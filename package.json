@@ -1,0 +1,32 @@
+{
+    "bin": {},
+    "dependencies": {},
+    "devDependencies": {
+        "mocha": "^3.3.0"
+    },
+    "directories": {},
+    "scripts": {
+        "test": "mocha"
+    },
+    "name": "commandos",
+    "version": "0.0.1",
+    "main": "index.js",
+    "keywords": [
+        "command",
+        "command-line",
+        "cli",
+        "options",
+        "dos"
+    ],
+    "homepage": "https://github.com/YounGoat/nodejs.commandos",
+    "description": "Command line parser, compatible with DOS style command",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/YounGoat/nodejs.commandos.git"
+    },
+    "author": {
+        "name": "YounGoat",
+        "email": "youngoat@163.com",
+        "url": "https://youngoat.github.io"
+    }
+}

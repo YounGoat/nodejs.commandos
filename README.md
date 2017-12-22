@@ -120,9 +120,11 @@ There are already many packages help you to parse command line content, in which
 
 ##  References
 
-If __jinang/parseCommand__ is not to your taste, maybe the following packages is considerable (in alphabetical order):
+If __commandos__ is not to your taste, maybe the following packages is considerable (in alphabetical order):
 
 *   [commander](https://www.npmjs.com/package/commander)
+*   [getopts](https://www.npmjs.com/package/getopts)
 *   [minimist](https://www.npmjs.com/package/minimist)
 *   [nomnom](https://www.npmjs.com/package/nomnom)
 *   [optimist](https://www.npmjs.com/package/optimist)
+*   [yargs](https://www.npmjs.com/package/yargs)

@@ -40,11 +40,11 @@ function parseColumn(desc) {
     let column = { 
         name: null,
         alias: [],
-        assignable: true,
+        assignable: undefined,
         caseSensitive: undefined,
+        multiple: undefined,
+        nullable: undefined,
         overwrite: undefined,
-        multiple: false,
-        nullable: true,
     };
 
     if (typeof desc == 'string') {
@@ -145,6 +145,16 @@ function parseColumn(desc) {
         column.name = names.shift();
         column.alias = names.concat(column.alias);       
     }
+
+    column.multiple = ifUndefined(column.multiple, false);
+    if (column.multiple && 
+        (column.nullable === true || column.assignable === false || column.overwrite === true)) {
+        throw new Error(`option MULTIPLE should also be ASSIGNABLE, NOT NULLABLE and NOT overwrite: ${column.name}`);
+    }
+
+    column.assignable = ifUndefined(column.assignable, true);
+    column.nullable = ifUndefined(column.nullable, true);
+
     return column;
 }
 
@@ -190,31 +200,40 @@ function parseCommand(cmd, def) {
     // Main Process
 
     let raw = { options: [], $: [] };
-    if (1) {
-        let last = null;
-        args.forEach(arg => {
-            if (arg.toLowerCase().startsWith('--no-')) {
-                let name = arg.substr(5);
-                raw.options.push(last = { name, value: false });
+    args.forEach(arg => {
+        if (/^(-{1,2})(no-)?([^=]+)(=(.+))?$/i.test(arg)) {
+            let dash  = RegExp.$1;
+            let no    = RegExp.$2;
+            let name  = RegExp.$3;
+            let value = RegExp.$4 ? RegExp.$5 : true;
+
+            if (no) {
+                if (dash.length == 1 || value !== true) {
+                    throw new Error(`incomprehensible option: ${arg}`);
+                }
+                value = false;
+                raw.options.push({ name, value });
             }
-            else if (arg.startsWith('--')) {
-                let name = arg.substr(2);
-                raw.options.push(last = { name, value: true });
-            }
-            else if (arg.startsWith('-')) {
-                let names = arg.substr(1).split('');
-                names.forEach(name => raw.options.push(last = { name, value: true }));
+            else if (dash.length == 1) {
+                let names = name.split('');
+                let lastname = names.pop();
+                names.forEach(shortname => raw.options.push({ name: shortname, value: true }));
+                raw.options.push({ name: lastname, value });
             }
             else {
-                raw.$.push(arg);
-
-                // 如果上一个选项非 --no-* 形式选项，则标记其对应的值的序号。
-                if (last.value === true) {
-                    last.value = raw.$.length - 1;
-                }
+                raw.options.push({ name, value });
             }
-        });
-    }
+        }
+        else {
+            raw.$.push(arg);
+
+            // 如果上一个选项非 --no-* 形式选项，则标记其对应的值的序号。
+            let last = raw.options[ raw.options.length - 1 ];
+            if (last && last.value === true) {
+                last.value = raw.$.length - 1;
+            }
+        }
+    });
 
     // 从原始选项数据中提取指定位置的值。
     let consumeOption = (index, novalue) => {

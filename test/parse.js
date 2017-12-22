@@ -19,13 +19,6 @@ describe('parse, simple usage', () => {
         assert.strictEqual(cmd.male, true);
     });
 
-    it('parse short options', () => {
-        let cmdtext = 'foo -ab';
-        let cmd = parseCommand(cmdtext);
-        assert.strictEqual(cmd.a, true);
-        assert.strictEqual(cmd.b, true);
-    });
-
     it('rename options', () => {
         let cmdtext = 'foo -v 1.0';
         let cmd = parseCommand(cmdtext, [ '--version -v' ]);
@@ -41,6 +34,42 @@ describe('parse, simple usage', () => {
 
         cmd = parseCommand(cmdtext, [ '-v --version' ]);
         assert.equal(cmd.v, '3.0');
+    });
+});
+
+describe('parse, short options', () => {
+    it('combined short options', () => {
+        let cmdtext = 'foo -ab';
+        let cmd = parseCommand(cmdtext);
+        assert.strictEqual(cmd.a, true);
+        assert.strictEqual(cmd.b, true);
+    });
+
+    it('combined short options and following value', () => {
+        let cmdtext = 'foo -ab bravo';
+        let cmd = parseCommand(cmdtext);
+        assert.strictEqual(cmd.a, true);
+        assert.equal(cmd.b, 'bravo');
+    });
+});
+
+describe('parse, --name=value pattern', () => {
+    it('long name', () => {
+        let cmdtext = 'foo -v 1.0 --gender=male';
+        let cmd = parseCommand(cmdtext);
+        assert.equal(cmd.gender, 'male');
+    });
+
+    it('short name', () => {
+        let cmdtext = 'foo -mv=1.0';
+        let cmd = parseCommand(cmdtext);
+        assert.strictEqual(cmd.m, true);
+        assert.equal(cmd.v, '1.0');
+    });
+
+    it('--no-<option> SHOULD NOT be assigned', () => {
+        let cmdtext = 'foo --no-gender=male';
+        assert.throws(ex => parseCommand(cmdtext));
     });
 });
 
@@ -104,15 +133,41 @@ describe('parse, option settings', () => {
             }
         ];
         let cmd = parseCommand(cmdtext, options);
+        assert(cmd.v instanceof Array);
         assert.equal(cmd.v.length, 3);
     });
 
-    it('multiple enabled, nullable := false implicated', () => {
-        let cmdtext = 'foo -v -v 2.0 -v 3.0';
+    it('multiple enabled, MUST NOT nullable enabled explicitly', () => {
+        let cmdtext = 'foo -v 1.0 -v 2.0 -v 3.0';
         let options = [ 
             { 
                 name: 'v',
                 multiple: true,
+                nullable: true,
+            }
+        ];
+        assert.throws(() => parseCommand(cmdtext, options));
+    });
+
+    it('multiple enabled, MUST NOT assignable disabled explicitly', () => {
+        let cmdtext = 'foo -v 1.0 -v 2.0 -v 3.0';
+        let options = [ 
+            { 
+                name: 'v',
+                multiple: true,
+                assignable: false,
+            }
+        ];
+        assert.throws(() => parseCommand(cmdtext, options));
+    });
+
+    it('multiple enabled, MUST NOT overwrite enabled explicitly', () => {
+        let cmdtext = 'foo -v 1.0 -v 2.0 -v 3.0';
+        let options = [ 
+            { 
+                name: 'v',
+                multiple: true,
+                overwrite: true,
             }
         ];
         assert.throws(() => parseCommand(cmdtext, options));
@@ -151,6 +206,70 @@ describe('parse, option settings', () => {
                 required: true,
             }
         ];
+        let settings = { overwrite: true, options };
+        assert.throws(() => parseCommand(cmdtext, settings));
+    });
+});
+
+describe('parse, option setting language', () => {
+    it('assignable disabled', () => {
+        let cmdtext = 'foo --version 1.0';
+        let options = [ '--version NOT ASSIGNABLE' ];
+        let cmd = parseCommand(cmdtext, options);
+        assert.strictEqual(cmd.version, true);
+        assert.equal(cmd.$.length, 1);
+    });
+
+    it('case-insenstive', () => {
+        let cmdtext = 'foo --Version 1.0';
+        let options = [ '--version NOT CASE_SENSITIVE' ];
+        let settings = { caseSensitive: true, options };
+        let cmd = parseCommand(cmdtext, settings);
+        assert.equal(cmd.version, '1.0');
+    });
+
+    it('multiple enabled', () => {
+        let cmdtext = 'foo -v 1.0 -v 2.0 -v 3.0';
+        let options = [ '-v MULTIPLE' ];
+        let cmd = parseCommand(cmdtext, options);
+        assert(cmd.v instanceof Array);
+        assert.equal(cmd.v.length, 3);
+    });
+
+    it('multiple enabled, MUST NOT nullable enabled explicitly', () => {
+        let cmdtext = 'foo -v 1.0 -v 2.0 -v 3.0';
+        let options = [ '-v MULTIPLE NULL' ];
+        assert.throws(() => parseCommand(cmdtext, options));
+    });
+
+    it('multiple enabled, MUST NOT assignable disabled explicitly', () => {
+        let cmdtext = 'foo -v 1.0 -v 2.0 -v 3.0';
+        let options = [ '-v MULTIPLE NOT ASSIGNABLE' ];
+        assert.throws(() => parseCommand(cmdtext, options));
+    });
+
+    it('multiple enabled, MUST NOT overwrite enabled explicitly', () => {
+        let cmdtext = 'foo -v 1.0 -v 2.0 -v 3.0';
+        let options = [ '-v MULTIPLE OVERWRITE' ];
+        assert.throws(() => parseCommand(cmdtext, options));
+    });
+
+    it('nullable disabled', () => {
+        let cmdtext = 'foo -v';
+        let options = [ '-v NOT NULL' ];
+        assert.throws(() => parseCommand(cmdtext, options));
+    });
+
+    it('overwrite disabled', () => {
+        let cmdtext = 'foo --version 1.0 -v 2.0';
+        let options = [ '--version -v NOT OVERWRITE' ];
+        let settings = { overwrite: true, options };
+        assert.throws(() => parseCommand(cmdtext, settings));
+    });
+
+    it('required enabled', () => {
+        let cmdtext = 'foo';
+        let options = [ '--version REQUIRED' ];
         let settings = { overwrite: true, options };
         assert.throws(() => parseCommand(cmdtext, settings));
     });

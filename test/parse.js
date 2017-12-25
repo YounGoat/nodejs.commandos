@@ -206,8 +206,19 @@ describe('parse, option settings', () => {
                 required: true,
             }
         ];
-        let settings = { overwrite: true, options };
-        assert.throws(() => parseCommand(cmdtext, settings));
+        assert.throws(() => parseCommand(cmdtext, options));
+    });
+
+    it('required disabled', () => {
+        let cmdtext = 'foo';
+        let options = [ 
+            { 
+                name: 'version',
+                alias: 'v',
+                required: false,
+            }
+        ];
+        parseCommand(cmdtext, options);
     });
 });
 

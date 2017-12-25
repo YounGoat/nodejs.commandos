@@ -260,6 +260,7 @@ function parseCommand(cmd, def) {
         let caseSensitive = ifUndefined(column.caseSensitive, def.caseSensitive);
         let overwrite = ifUndefined(column.overwrite, def.overwrite);
 
+        // *names* includes formal name and alias.
         const names = [ column.name ].concat(column.alias);
         const names_lc = caseSensitive ? null : names.map(name => name.toLowerCase());
         const names_notation = names.map(name => (name.length > 1 ? '--' : '-') + name).join(', ');           
@@ -289,15 +290,6 @@ function parseCommand(cmd, def) {
             }
         }
         parsedOptions[column.name] = value;
-
-        if (!found && column.alias) {
-            // If property not found, try alias if defined.
-            let alias = column.alias instanceof Array ? column.alias : [ column.alias ];
-            for (let i = 0; i < alias.length && !found; i++) {
-                // If there are more than one alias, the former in definition is prior.
-                found = extractProperty(alias[i], propertyName);
-            }
-        }
 
         if (found && !column.nullable && typeof value == 'boolean') {
             throw new Error(`option need to be valued: ${names_notation}`);

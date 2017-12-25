@@ -12,14 +12,15 @@
         "test": "mocha"
     },
     "name": "commandos",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "main": "index.js",
     "keywords": [
         "command",
         "command-line",
         "cli",
         "options",
-        "dos"
+        "dos",
+        "getopts"
     ],
     "homepage": "https://github.com/YounGoat/nodejs.commandos",
     "description": "Command line parser, compatible with DOS style command",

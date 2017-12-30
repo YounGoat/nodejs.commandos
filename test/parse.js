@@ -68,6 +68,11 @@ describe('parse, --name=value pattern', () => {
         assert.equal(cmd.v, '1.0');
     });
 
+    it('--=value SHOULD throw exception', () => {
+        let cmdtext = 'foo --=male';
+        assert.throws(ex => parseCommand(cmdtext));
+    });
+
     it('--no-<option> SHOULD NOT be assigned', () => {
         let cmdtext = 'foo --no-gender=male';
         assert.throws(ex => parseCommand(cmdtext));
@@ -254,10 +259,13 @@ describe('parse, option setting language', () => {
 
     it('multiple enabled', () => {
         let cmdtext = 'foo -v 1.0 -v 2.0 -v 3.0';
-        let options = [ '-v MULTIPLE' ];
+        let options = [ '-v MULTIPLE', '-n MULTIPLE' ];
         let cmd = parseCommand(cmdtext, options);
+        
         assert(cmd.v instanceof Array);
         assert.equal(cmd.v.length, 3);
+
+        assert(!cmd.hasOwnProperty('n'));
     });
 
     it('multiple enabled, MUST NOT nullable enabled explicitly', () => {

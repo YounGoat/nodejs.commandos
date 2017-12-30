@@ -2,6 +2,12 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##	[0.1.1] - Dec 30, 2017
+
+###	Fixed
+
+CLI sub-expression like `--=value` will be parsed to `{ '-': 'value' }` before. However, it is really ambiguous. Since this version, an exception will be thrownm in such cases.
+
 ##	[0.1.0] - Dec 30, 2017
 
 ##  [0.0.3] - Dec 23, 2017

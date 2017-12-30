@@ -265,13 +265,16 @@ function parseRaw(args, def) {
         $: []
     };
     args.forEach(arg => {
-        if (/^(-{1,2})(no-)?([^=]+)(=(.+))?$/i.test(arg)) {
+        if (/^(-{1,2})(no-)?([^=]*)(=(.+))?$/i.test(arg)) {
             let dash = RegExp.$1;
             let no = RegExp.$2;
             let name = RegExp.$3;
             let value = RegExp.$4 ? RegExp.$5 : true;
 
-            if (no) {
+            if (name.length == 0) {
+                throw new Error(`incomprehensible option: ${arg}`);
+            }
+            else if (no) {
                 if (dash.length == 1 || value !== true) {
                     throw new Error(`incomprehensible option: ${arg}`);
                 }

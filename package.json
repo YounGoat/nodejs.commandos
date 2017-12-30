@@ -1,18 +1,18 @@
 {
     "bin": {},
     "dependencies": {
-        "jinang": "^0.2.0",
-        "noda": "^0.1.2"
+        "jinang": "^0.3.1"
     },
     "devDependencies": {
-        "mocha": "^3.3.0"
+        "mocha": "^3.3.0",
+        "noda": "^0.1.2"
     },
     "directories": {},
     "scripts": {
         "test": "mocha"
     },
     "name": "commandos",
-    "version": "0.0.3",
+    "version": "0.1.0",
     "main": "index.js",
     "keywords": [
         "command",

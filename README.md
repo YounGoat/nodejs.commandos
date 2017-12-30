@@ -139,6 +139,7 @@ To indicate how __commandos.parse__ actions, parameter *settings* may contain fo
 *   __overwrite__ *boolean* DEFAULT `true` OPTIONAL
 *   __caseSensitive__ *boolean* DEFAULT `true` OPTIONAL
 *   __explicit__ *boolean* DEFAULT `false` OPTIONAL
+*   __ignoreInvalidArgument__ *boolean* DEFAULT `false` OPTIONAL
 *   __options__ *Array* OPTIONAL
 *   __groups__ *Array* OPTIONAL
 

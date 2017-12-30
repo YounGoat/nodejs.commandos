@@ -131,6 +131,7 @@ commandos.parse('foo -n JACK -g male', settings);
 *   __overwrite__ *boolean* DEFAULT `true` OPTIONAL
 *   __caseSensitive__ *boolean* DEFAULT `true` OPTIONAL
 *   __explicit__ *boolean* DEFAULT `false` OPTIONAL
+*   __ignoreInvalidArgument__ *boolean* DEFAULT `false` OPTIONAL
 *   __options__ *Array* OPTIONAL
 *   __groups__ *Array* OPTIONAL
 

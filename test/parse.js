@@ -77,6 +77,12 @@ describe('parse, --name=value pattern', () => {
         let cmdtext = 'foo --no-gender=male';
         assert.throws(ex => parseCommand(cmdtext));
     });
+
+    it('ignore invalid argument', () => {
+        let cmdtext = 'foo --=male --gender=male';
+        let cmd = parseCommand(cmdtext, { ignoreInvalidArgument: true });
+        assert.equal(cmd.gender, 'male');
+    });
 });
 
 describe('parse, global settings', () => {

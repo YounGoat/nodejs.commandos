@@ -36,17 +36,6 @@ const MODULE_REQUIRE = 1
         return names;
     };
 
-function throwParseError(error, catcher) {
-    if (typeof error == 'string') {
-        error = new Error(error);
-    }
-    if (catcher) {
-        catcher(error);
-    } else {
-        throw error;
-    }
-}
-
 function parseColumn(desc, catcher) {
     let column = {
         name: null,
@@ -264,7 +253,8 @@ function parseRaw(args, def) {
         options: [],
         $: []
     };
-    args.forEach(arg => {
+
+    let parseArg = arg => {
         if (/^(-{1,2})(no-)?([^=]*)(=(.+))?$/i.test(arg)) {
             let dash = RegExp.$1;
             let no = RegExp.$2;
@@ -308,6 +298,14 @@ function parseRaw(args, def) {
             if (last && last.value === true) {
                 last.value = raw.$.length - 1;
             }
+        }
+    };
+
+    args.forEach(arg => {
+        try {
+            parseArg(arg);
+        } catch (ex) {
+            if (!def.ignoreInvalidArgument) throw ex;
         }
     });
 

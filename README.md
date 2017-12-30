@@ -104,7 +104,7 @@ const settings = {
 commandos.parse('foo -v 1.0', settings);
 // RETURN { version, $ }
 
-commandos.parse('foo -n JACK -g male', settings);
+commandos.parse('foo -n JACK -g male', settings);
 // RETURN { name, gender, $ }
 ```
 
@@ -120,7 +120,7 @@ const settings = {
         [ '--name -n', '--gender -g' ]
     ]
 };
-commandos.parse('foo -n JACK -g male', settings);
+commandos.parse('foo -n JACK -g male', settings);
 // RETURN { $ }
 // The first option group matched, becuase it does NOT require any options.
 ```
@@ -142,7 +142,7 @@ To indicate how __commandos.parse__ actions, parameter *settings* may contain fo
 *   __options__ *Array* OPTIONAL
 *   __groups__ *Array* OPTIONAL
 
-A standard *definition of an option* (item of array *optionDefinitions* or *settings.options*) SHOULD be an object or a string. It may be an object made up of following attributes:
+A standard *definition of an option* (item of array *optionDefinitions* or *settings.options*) SHOULD be an object or a string. It may be an object made up of following attributes:
 
 *   __name__ *string*  
     Option's formal name which will be attribute name of the returned object.

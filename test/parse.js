@@ -17,6 +17,7 @@ describe('parse, simple usage', () => {
         let cmd = parseCommand(cmdtext);
         assert.equal(cmd.v, '1.0');
         assert.strictEqual(cmd.male, true);
+        assert.equal(cmd.$.length, 0);
     });
 
     it('rename options', () => {
@@ -220,6 +221,18 @@ describe('parse, option settings', () => {
         ];
         parseCommand(cmdtext, options);
     });
+
+    it('default value', () => {
+        let cmdtext = 'foo';
+        let options = [
+            {
+                name: 'version',
+                default: '1.0'
+            }
+        ];
+        let cmd = parseCommand(cmdtext, options);
+        assert.equal(cmd.version, '1.0');
+    });
 });
 
 describe('parse, option setting language', () => {
@@ -283,5 +296,31 @@ describe('parse, option setting language', () => {
         let options = [ '--version REQUIRED' ];
         let settings = { overwrite: true, options };
         assert.throws(() => parseCommand(cmdtext, settings));
+    });
+});
+
+describe('parse, option groups', () => {
+    it('matched', () => {
+        let cmdtext = 'foo -v 1.0';
+        let groups = [
+            [ '--help -h' ],
+            [ '--version -v REQUIRED' ],
+        ];
+        let cmd = parseCommand(cmdtext, { groups });
+        assert.strictEqual(cmd.version, '1.0');
+    });
+
+    it('not matched', () => {
+        let cmdtext = 'foo';
+        let groups = [
+            [ '--help -h REQUIRED' ],
+            [ '--version REQUIRED' ],
+        ];
+        try {
+            let cmd = parseCommand(cmdtext, { groups });
+            assert.fail('expected exception not throwed');
+        } catch (ex) {
+            assert(ex.reasons);
+        }
     });
 });

@@ -191,7 +191,10 @@ It can also be a string according to private syntax looks like [column definitio
 
 Read unit test code for examples:
 
-*   [commandos.parse](./test/parse.js)
+*   [commandos.parse: basic usage](./test/parse.basic-usage.js)
+*   [commandos.parse: global settings](./test/parse.global-settings.js)
+*   [commandos.parse: option settings](./test/parse.option-settings.js)
+*   [commandos.parse: option groups](./test/parse.option-groups.js)
 
 ##  Why *commandos*
 

@@ -342,8 +342,8 @@ function parseCommand(cmd, def) {
     def = Object.assign({
         overwrite: true,
         caseSensitive: true,
-        explicit: false,
         catcher: null,
+        explicit: false,
         groups: null,
         options: [],
     }, def);

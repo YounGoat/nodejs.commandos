@@ -183,7 +183,10 @@ __注意：以上属性之间可能是互斥的。__
 
 阅读测试用例代码以获取更多示例：
 
-*   [commandos.parse](./test/parse.js)
+*   [commandos.parse: basic usage](./test/parse.basic-usage.js)
+*   [commandos.parse: global settings](./test/parse.global-settings.js)
+*   [commandos.parse: option settings](./test/parse.option-settings.js)
+*   [commandos.parse: option groups](./test/parse.option-groups.js)
 
 ##  起源
 

@@ -2,6 +2,12 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##	[0.1.4] - Jan 3, 2018
+
+###	New
+
+Allow taking non-option argument(s) as option value by setting __nonOption__ property in option definition.
+
 ##	[0.1.3] - Jan 2, 2018
 
 ###	Fixed

@@ -18,6 +18,9 @@ The name *commandos* is combination of *command* and *DOS*. __commandos__ is a l
 
 *	[Get Started](#get-started)
 *	[API](#api)
+*   [Go Advanced](#go-advanced)
+    *   [ODL, Option Definition Language](#odl-option-definition-language)
+    *   [Take Non-option Argument As Option Value](#take-non-option-argument-as-option-value)
 * 	[Examples](#examples)
 *	[Why commandos](#why-commandos)
 *	[Honorable Dependents](#honorable-dependents)
@@ -160,6 +163,9 @@ A standard *definition of an option* (item of array *optionDefinitions* or *sett
 *   __multiple__ *boolean* DEFAULT `false` OPTIONAL  
     If option is __multiple__, the parsed value will be an array.
 
+*   __nonOption__ *number | string | RegExp | Function* OPTIONAL  
+    If named option not found, the matching non-option argument(s) will be taken as the value of the option. See [Take Non-option Argument As Option Value](#take-non-option-argument-as-option-value) for details.
+
 *   __nullable__ *boolean* DEFAULT `true` OPTIONAL  
     When we say some option is NOT __nullable__, we mean it SHOULD NOT appear in the command line without being followed by some value.
 
@@ -172,7 +178,13 @@ A standard *definition of an option* (item of array *optionDefinitions* or *sett
 __ATTENTION：Some of previous attributes are mutexes.__  
 If option is __multiple__, it SHOULD NOT be a kind of switching value at the same time. That means the option is assignable and NOT nullable, attribute __nullable__, __assignable__ and  __overwrite__ will be ignored.
 
-It can also be a string according to private syntax looks like [column definition in MySQL](https://dev.mysql.com/doc/refman/8.0/en/create-table.html):
+It can also be a string according to private syntax looks like [column definition in MySQL](https://dev.mysql.com/doc/refman/8.0/en/create-table.html). For convenience, it is hereinafter referred to as [__ODL__(Option Definition Language)](#odl-option-definition-language).
+
+##  Go Advanced
+
+### ODL, Option Definition Language
+
+ODL is a tiny language used to define option. It is an easy alternative for option define object. E.g.
 
 ```javascript
 // * The option is named "version", or "v" in short. The first name is formal.
@@ -182,9 +194,47 @@ It can also be a string according to private syntax looks like [column definitio
 //   acceptable.
 '--version -v NOT NULL REQUIRED NOT CASE_SENSITIVE'
 
+// * If named option not offered, the first non-argument will be used as value of option "action".
+'--action [0:~* (start|stop|restart)]'
+
 // * The first word is regarded as formal name of the option.
 // * Alias "v" and "edition" are also acceptable.
 'version alias(v, edition)'
+```
+
+Keywords in ODL is case-insensitive:
+*   []
+*   ALIAS
+*   ASSIGNABLE
+*   CASE_SENSITIVE
+*   CASE_INSENSITIVE
+*   COMMENT
+*   DEFAULT
+*   MULTIPLE
+*   NULLALBE
+*   OVERWRITE
+*   REQUIRED
+
+### Take Non-option Argument As Option Value
+
+To make command line more flexiable, __commandos.parse__ allows, by setting __nonOption__ in *definition of an option*, to take non-option argument(s) as option value while named option not found. Property __nonOption__ is overloaded with following types:
+*   __nonOption__ *number*
+*   __nonOption__ *string*
+*   __nonOption__ *RegExp*
+*   __nonOption__ *Function*(value, index)
+
+In ODL, delimiters `[]` is used to define the nonOption property:
+```javascript
+// * Fixed position of non-option argument.
+// * Fixed value.
+'--help [0:=* help] NOT ASSIGNABLE'
+
+// * Any position.
+// * Use regular expression (case-insensitive) to validate the arguments.
+'--action [*:~* (start|stop|restart)]'
+
+// * Position range.
+'--name [>1]'
 ```
 
 ##  Examples
@@ -194,6 +244,7 @@ Read unit test code for examples:
 *   [commandos.parse: basic usage](./test/parse.basic-usage.js)
 *   [commandos.parse: global settings](./test/parse.global-settings.js)
 *   [commandos.parse: option settings](./test/parse.option-settings.js)
+*   [commandos.parse: take non-option argument as option value](./test/parse.option-nonoption.js)
 *   [commandos.parse: option groups](./test/parse.option-groups.js)
 
 ##  Why *commandos*

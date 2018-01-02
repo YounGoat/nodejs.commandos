@@ -2,6 +2,12 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##	[0.1.3] - Jan 2, 2018
+
+###	Fixed
+
+Fixed the bug taht Error *None of the option groups matched*  throwed if no named options found even if there is at least one option group requiring no named options.
+
 ##	[0.1.2] - Dec 30, 2017
 
 ###	New

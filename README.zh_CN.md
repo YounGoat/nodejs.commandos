@@ -9,6 +9,7 @@ __命令字符串分析工具__
 
 *	[快速开始](#快速开始)
 *	[API](#api)
+*   [进阶](#进阶)
 * 	[示例](#示例)
 *	[起源](#起源)
 *	[关于](#关于)
@@ -179,6 +180,63 @@ __注意：以上属性之间可能是互斥的。__
 'version alias(v, edition)'
 ```
 
+##  进阶
+
+### ODL 选项定义语言
+
+ODL 是用于定义选项的微语言，它是选项定义对象的简易替代品。例如：
+
+```javascript
+// * The option is named "version", or "v" in short. The first name is formal.
+// * The option SHOULD be appended with some value.
+// * The option SHOULD exist.
+// * The name is case-insensitive, that means "Version" and "V" are also 
+//   acceptable.
+'--version -v NOT NULL REQUIRED NOT CASE_SENSITIVE'
+
+// * If named option not offered, the first non-argument will be used as value of option "action".
+'--action [0:~* (start|stop|restart)]'
+
+// * The first word is regarded as formal name of the option.
+// * Alias "v" and "edition" are also acceptable.
+'version alias(v, edition)'
+```
+
+ODL 中的关键字大小写不敏感：
+*   []
+*   ALIAS
+*   ASSIGNABLE
+*   CASE_SENSITIVE
+*   CASE_INSENSITIVE
+*   COMMENT
+*   DEFAULT
+*   MULTIPLE
+*   NULLALBE
+*   OVERWRITE
+*   REQUIRED
+
+### 非选项参数替代选项值
+
+为了让命令行更灵活，__commandos.parse__ 支持通过在 *选项定义* 添加 __nonOption__ 属性，在命令行中未找到命名选项时，取非选项参数作为选项值。属性 __nonOption__ 支持以下类型的重载：
+*   __nonOption__ *number*
+*   __nonOption__ *string*
+*   __nonOption__ *RegExp*
+*   __nonOption__ *Function*(value, index)
+
+而在 ODL 中则使用定界符 `[]` 来定义 nonOption 属性：
+```javascript
+// * Fixed position of non-option argument.
+// * Fixed value.
+'--help [0:=* help] NOT ASSIGNABLE'
+
+// * Any position.
+// * Use regular expression (case-insensitive) to validate the arguments.
+'--action [*:~* (start|stop|restart)]'
+
+// * Position range.
+'--name [>1]'
+```
+
 ##  示例
 
 阅读测试用例代码以获取更多示例：
@@ -186,6 +244,7 @@ __注意：以上属性之间可能是互斥的。__
 *   [commandos.parse: basic usage](./test/parse.basic-usage.js)
 *   [commandos.parse: global settings](./test/parse.global-settings.js)
 *   [commandos.parse: option settings](./test/parse.option-settings.js)
+*   [commandos.parse: take non-option argument as option value](./test/parse.option-nonoption.js)
 *   [commandos.parse: option groups](./test/parse.option-groups.js)
 
 ##  起源

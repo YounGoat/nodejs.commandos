@@ -36,7 +36,7 @@ const MODULE_REQUIRE = 1
         return names;
     };
 
-function parseColumn(desc, catcher) {
+function parseColumn(desc) {
     let column = {
         name: null,
         alias: [],
@@ -45,10 +45,86 @@ function parseColumn(desc, catcher) {
         multiple: undefined,
         nullable: undefined,
         overwrite: undefined,
+        nonOption: undefined,
     };
 
     if (typeof desc == 'string') {
         let inParentheses = [];
+
+        desc = desc.replace(/(^|\s)\[(.+)\](\s|$)/, (content) => {
+            let nonOption = RegExp.$2.trim();
+            if (!/^([^:]+)(:(.*))?$/.test(nonOption)) {
+                throw new Error(`invalid nonOption definition: ${nonOption}`);
+            }
+            let positions = RegExp.$1.trim().split(/[,\s]+/);
+            let valueDef = RegExp.$3.trim();
+            
+            // ---------------------------
+            // 生成位置匹配函数。
+            positions = positions.map(position => {
+                let fn;
+                if (position == '*') {
+                    return fn = () => true;
+                }
+                if (/^\d+$/.test(position)) {
+                    position = parseInt(position);
+                    return fn = (index) => index == position;
+                }
+                if (/^(>|>=|<|<=|=)(\d+)$/.test(position)) {
+                    position = parseInt(RegExp.$2);
+                    switch (RegExp.$1) {
+                        case '>'  : return fn = (index) => index >  position;
+                        case '>=' : return fn = (index) => index >= position;
+                        case '<'  : return fn = (index) => index <  position;
+                        case '<=' : return fn = (index) => index <= position;
+                        case '='  : return fn = (index) => index == position;
+                    }
+                }
+                throw new Error(`invalid nonOption definition: ${nonOption}`);
+            });
+            // 最终的位置匹配函数。
+            let indexValidator = (index) => {
+                let valid = true;
+                for (let i = 0; valid && i < positions.length; i++) {
+                    valid = valid && positions[i](index);
+                }
+                return valid;
+            };
+
+            // ---------------------------
+            // 生成值匹配函数。
+            let valueValidator = null;
+            if (valueDef == '') {
+                valueValidator = () => true;
+            }
+            else if (/^=\*(.+)$/.test(valueDef)) {
+                let v = RegExp.$1.trim().toLowerCase();
+                valueValidator = (value) => v == value.toLowerCase();
+            }
+            else if (/^=(.+)$/.test(valueDef)) {
+                let v = RegExp.$1.trim();
+                valueValidator = (value) => v == value;
+            }
+            else if (/^~\*(.+)$/.test(valueDef)) {
+                let re = new RegExp(RegExp.$1.trim(), 'i');
+                valueValidator = (value) => re.test(value);
+            }
+            else if (/^~(.+)$/.test(valueDef)) {
+                let re = new RegExp(RegExp.$1.trim());
+                valueValidator = (value) => re.test(value);
+            }
+            else {
+                throw new Error(`invalid nonOption definition: ${nonOption}`);
+            }
+
+            // ---------------------------
+            // 生成完整的非选项参数匹配函数。            
+            column.nonOption = (value, index) => indexValidator(index) && valueValidator(value);
+
+            // 位置替补定义语句已完成其使命。
+            // 注意须用一个空格替换，以免将可能的前后片断粘连在一起。
+            return ' ';
+        });
 
         desc = desc.replace(/\s*\([^)]+\)/g, (content) => {
             let index = inParentheses.length;
@@ -150,6 +226,24 @@ function parseColumn(desc, catcher) {
         throw new Error(`option MULTIPLE should also be ASSIGNABLE, NOT NULLABLE and NOT overwrite: ${column.name}`);
     }
 
+    if (typeof column.nonOption != 'undefined') {
+        if (typeof column.nonOption == 'number') {
+            let pos = column.nonOption;
+            column.nonOption = (index, value) => index === pos;
+        }
+        else if (column.nonOption == 'string') {
+            let text = column.nonOption;
+            column.nonOption = (index, value) => value == text;
+        }
+        else if (column.nonOption instanceof RegExp) {
+            let re = column.nonOption;
+            column.nonOption = (index, value) => re.text(value);
+        }
+        else if (typeof column.nonOption != 'function') {
+            throw new Error(`invalid option's nonOption property: $column.nonOption`);
+        }
+    }
+
     column.assignable = ifUndefined(column.assignable, true);
     column.nullable = ifUndefined(column.nullable, true);
 
@@ -174,7 +268,7 @@ function parseOptions(raw, def) {
     };
 
     let parsedOptions = {};
-
+    let names_notation_cache = {};
     for (let I = 0; I < def.options.length; I++) {
         const column = def.options[I];
 
@@ -185,6 +279,7 @@ function parseOptions(raw, def) {
         const names = [column.name].concat(column.alias);
         const names_lc = caseSensitive ? null : names.map(name => name.toLowerCase());
         const names_notation = names.map(name => (name.length > 1 ? '--' : '-') + name).join(', ');
+        names_notation_cache[column.name] = names_notation;
 
         let found = false;
         let value = column.multiple ? [] : null;
@@ -213,6 +308,56 @@ function parseOptions(raw, def) {
         if (found) {
             parsedOptions[column.name] = value;
         }
+    }
+
+    if (raw.options.length) {
+        if (def.explicit) {
+            let names_notation = raw.options.map(option => (option.name.length > 1 ? '--' : '-') + option.name);
+            throw new Error(`unknown options: ${names_notation}`);
+        } else {
+            while (raw.options.length) {
+                let option = raw.options[0];
+                parsedOptions[option.name] = consumeOption(0);
+            }
+        }
+    }
+
+    // 在依据选项定义的 nonOption 属性消费余项之前，需要先删除已被其他选项显式占用的余项。
+    parsedOptions.$ = raw.$.filter(v => v !== null);
+
+    for (let I = 0; I < def.options.length; I++) {
+        const column = def.options[I];
+        const names_notation = names_notation_cache[column.name];
+        let found = parsedOptions.hasOwnProperty(column.name);
+        let value = parsedOptions[column.name];
+
+        // 消费余项。
+        if (!found && column.nonOption) {
+            value = column.multiple ? [] : null;
+            let matchedIndexes = [];
+            for (let i = 0, $i; i < parsedOptions.$.length; i++) {
+                $i = parsedOptions.$[i];
+                if ($i === null) continue;
+                if (column.nonOption($i, i)) {
+                    // 将匹配项中余项数组中剥离。
+                    parsedOptions.$[i] = null;
+
+                    found = true;
+
+                    // 如果选项支持重复项，则继续尝试匹配，否则终止。
+                    if (column.multiple) {
+                        value.push($i);
+                    }
+                    else {
+                        value = column.assignable ? $i : true;
+                        break;
+                    }
+                }
+            }
+            if (found) {
+                parsedOptions[column.name] = value;
+            }
+        }
 
         if (found && !column.nullable && typeof value == 'boolean') {
             throw new Error(`option need to be valued: ${names_notation}`);
@@ -231,19 +376,8 @@ function parseOptions(raw, def) {
         }
     }
 
-    if (raw.options.length) {
-        if (def.explicit) {
-            let names_notation = raw.options.map(option => (option.name.length > 1 ? '--' : '-') + option.name);
-            throw new Error(`unknown options: ${names_notation}`);
-        } else {
-            while (raw.options.length) {
-                let option = raw.options[0];
-                parsedOptions[option.name] = consumeOption(0);
-            }
-        }
-    }
-
-    parsedOptions.$ = raw.$.filter(v => v != null);
+    // 注意：因为选项可能依据 nonOption 属性又消费了一轮余项，因此这里有必要再筛选一次。
+    parsedOptions.$ = raw.$.filter(v => v !== null);
 
     return parsedOptions;
 }
@@ -353,53 +487,47 @@ function parseCommand(cmd, def) {
     // ---------------------------
     // Main Process
 
-    let throws = (fn) => {
-        try {
-            return fn();
-        } catch (ex) {
-            if (def.catcher) def.catcher(ex);
-            else throw ex;    
-        }
-    };
+    let parsedOptions = null;        
+    try {
+        let raw = parseRaw(args, def);
+        if (def.groups && def.groups.length) {
+            let reasons = [];
+            let maxMatching = -1;
+            for (let i = 0; i < def.groups.length; i++) {
+                let rawcopy = safeClone(raw);
+                let parsed = null;
+                let matching = 0;
+                def.options = def.groups[i].map(parseColumn);
+                try {
+                    parsed = parseOptions(rawcopy, def);
 
-    let raw = throws(() => parseRaw(args, def));
-    let parsedOptions = null;
-    if (def.groups && def.groups.length) {
-        let reasons = [];
-        let maxMatching = 0;
-        for (let i = 0; i < def.groups.length; i++) {
-            let rawcopy = safeClone(raw);
-            let parsed = null;
-            let matching = 0;
-            def.options = throws(() => def.groups[i].map(parseColumn));
-            try {
-                parsed = parseOptions(rawcopy, def);
-
-                // 取匹配度最高的选项组。
-                def.options.forEach(option => {
-                    if (parsed.hasOwnProperty(option.name)) matching++;
-                });
-                if (matching > maxMatching) {
-                    maxMatching = matching;
-                    parsedOptions = parsed;
+                    // 取匹配度最高的选项组。
+                    def.options.forEach(option => {
+                        if (parsed.hasOwnProperty(option.name)) matching++;
+                    });
+                    if (matching > maxMatching) {
+                        maxMatching = matching;
+                        parsedOptions = parsed;
+                    }
+                } catch (ex) {
+                    reasons.push(ex);
                 }
-            } catch (ex) {
-                reasons.push(ex);
+            }
+
+            if (!parsedOptions) {
+                let error = new Error('None of the option groups matched');
+                error.reasons = reasons;
+                throw error;                
             }
         }
-
-        if (!parsedOptions) {
-            let error = new Error('None of the option groups matched');
-            error.reasons = reasons;
-            if (def.catcher) def.catcher(error);
-            else throw error;
-        }
+        else {
+            def.options = def.options.map(parseColumn);
+            parsedOptions = parseOptions(raw, def);
+        }       
+    } catch(ex) {
+        if (def.catcher) def.catcher(ex);
+        else throw ex;    
     }
-    else {
-        def.options = throws(() => def.options.map(parseColumn));
-        parsedOptions = throws(() => parseOptions(raw, def));
-    }
-    
     return parsedOptions;
 }
 

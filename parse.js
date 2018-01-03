@@ -323,7 +323,7 @@ function parseOptions(raw, def) {
     }
 
     // 在依据选项定义的 nonOption 属性消费余项之前，需要先删除已被其他选项显式占用的余项。
-    parsedOptions.$ = raw.$.filter(v => v !== null);
+    raw.$ = raw.$.filter(v => v !== null);
 
     for (let I = 0; I < def.options.length; I++) {
         const column = def.options[I];
@@ -335,12 +335,12 @@ function parseOptions(raw, def) {
         if (!found && column.nonOption) {
             value = column.multiple ? [] : null;
             let matchedIndexes = [];
-            for (let i = 0, $i; i < parsedOptions.$.length; i++) {
-                $i = parsedOptions.$[i];
+            for (let i = 0, $i; i < raw.$.length; i++) {
+                $i = raw.$[i];
                 if ($i === null) continue;
                 if (column.nonOption($i, i)) {
                     // 将匹配项中余项数组中剥离。
-                    parsedOptions.$[i] = null;
+                    raw.$[i] = null;
 
                     found = true;
 
@@ -528,6 +528,7 @@ function parseCommand(cmd, def) {
         if (def.catcher) def.catcher(ex);
         else throw ex;    
     }
+    
     return parsedOptions;
 }
 

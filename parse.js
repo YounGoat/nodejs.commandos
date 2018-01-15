@@ -163,7 +163,7 @@ function parseColumn(desc) {
 
             switch (deco) {
                 case 'required':
-                case 'nullalbe':
+                case 'nullable':
                 case 'assignable':
                 case 'multiple':
                 case 'overwrite':

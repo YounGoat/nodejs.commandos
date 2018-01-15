@@ -2,11 +2,12 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
-##	[0.1.5] - Jan 3, 2018
+##	[0.1.5] - Jan 15, 2018
 
 ###	Fixed
 
-Fixed the bug in __commandos.parse__ that non-option arguments taken by named options are not excluded from the `$` array.
+*	Fixed the bug that keyword `NULLABLE` in ODL not recogonized.
+*	Fixed the bug in __commandos.parse__ that non-option arguments taken by named options are not excluded from the `$` array.
 
 ##	[0.1.4] - Jan 3, 2018
 

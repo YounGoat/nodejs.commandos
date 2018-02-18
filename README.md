@@ -267,3 +267,4 @@ If __commandos__ is not to your taste, maybe the following packages is considera
 *   [nomnom](https://www.npmjs.com/package/nomnom)
 *   [optimist](https://www.npmjs.com/package/optimist)
 *   [yargs](https://www.npmjs.com/package/yargs)
+*   [cli-argparse](https://www.npmjs.com/package/cli-argparse)

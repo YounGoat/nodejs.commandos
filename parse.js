@@ -167,7 +167,7 @@ function parseColumn(desc) {
                 case 'assignable':
                 case 'multiple':
                 case 'overwrite':
-                case 'caseSensitive':
+                case 'caseSensitive': // actually, "caseSensitive" will not really occur because deco has been lowercased before.
                     column[deco] = !notdeco;
                     break;
 

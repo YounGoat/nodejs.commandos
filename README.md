@@ -211,6 +211,8 @@ Keywords in ODL is case-insensitive:
 *   COMMENT
 *   DEFAULT
 *   MULTIPLE
+*   NOT
+*   NULL
 *   NULLALBE
 *   OVERWRITE
 *   REQUIRED

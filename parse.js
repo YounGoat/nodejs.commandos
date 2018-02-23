@@ -22,7 +22,8 @@ const MODULE_REQUIRE = 1
         return ret;
     }
 
-    , splitIntoNames = (name, prefixedWithDash) => {
+    // 验证并解析字符串，从中提取选项名。
+    , splitIntoNames = (/*string*/ name, /*boolean*/ prefixedWithDash) => {
         let names = [];
         name.trim().split(/[\s,]+/).forEach(part => {
             if (part.startsWith('--')) {
@@ -135,12 +136,24 @@ function parseColumn(desc) {
 
         let parts = desc.split(/\s+/g);
 
-        if (1) {
-            column.alias = splitIntoNames(parts[0]);
-            column.name = column.alias.shift();
-        }
+        let decos = [];
+        parts.forEach((part, index) => {
+            // 首词无论是否前缀 - 或 --，均视为选项名。
+            let dashed = (index > 0);
+            let names = splitIntoNames(part, dashed);
 
-        let decos = parts.slice(1).map(deco => deco.toLowerCase());
+            if (index == 0) {
+                column.name = names.shift();
+                column.alias = names;
+            }
+            else if (names.length) {
+                column.alias = column.alias.concat(names);
+            }
+            else {
+                decos.push(part.toLowerCase());
+            }
+        });
+
         let notdeco = false;
         decos.forEach((deco) => {
             // NOT is keyword to decorate the following decorator.

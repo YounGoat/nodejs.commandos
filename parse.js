@@ -460,7 +460,7 @@ function parseRaw(args, def) {
 }
 
 /**
- * @param  {string|string[]} cmd
+ * @param  {Object|string|string[]} cmd
  * @param  {Object} def
  */
 function parseCommand(cmd, def) {
@@ -468,15 +468,30 @@ function parseCommand(cmd, def) {
     // ---------------------------
     // Argument Validation
 
-    let argv = null;
+    let argv = null, readyOptions = null;
 
     if (typeof arguments[0] == 'string') {
         argv = split(arguments[0], /\s+/, ['"', "'"], '\\');
         def = arguments[1];
-    } else if (arguments[0] instanceof Array) {
+    } 
+    else if (arguments[0] instanceof Array) {
         argv = arguments[0].slice(0);
         def = arguments[1];
-    } else {
+    } 
+    else if (typeof arguments[0] == 'object') {
+        let cmd = arguments[0];
+        let options = [], $ = [];
+        for (let name in cmd) {
+            if (name == '$') {
+                $ = cmd[name] instanceof Array ? cmd[name] : [ cmd[name] ];
+            }
+            else {
+                options.push({ name, value: cmd[name] });
+            }
+        }
+        readyOptions = { options, $ };
+    }
+    else {
         argv = process.argv.slice(1);
         def = arguments[0];
     }
@@ -495,14 +510,16 @@ function parseCommand(cmd, def) {
         options: [],
     }, def);
 
-    let [name, ...args] = argv;
+    let args = argv ? argv.slice(1) : null;
+    // let [name, ...args] = argv;
 
     // ---------------------------
     // Main Process
 
     let parsedOptions = null;        
     try {
-        let raw = parseRaw(args, def);
+        let raw = readyOptions ? readyOptions : parseRaw(args, def);
+        // let raw = parseRaw(args, def);
         if (def.groups && def.groups.length) {
             let reasons = [];
             let maxMatching = -1;

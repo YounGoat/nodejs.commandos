@@ -118,14 +118,30 @@ commandos.parse('foo -n JACK -g male', settings);
 // The first option group matched, becuase it does NOT require any options.
 ```
 
+### 传入预解析对象
+
+`commandos.parse()` 也可以接受 *options* 对象，并依据 *settings* 对其进行校验和规范化。例如：
+```javascript
+const options = { v: '1.0', name: 'JACK' };
+const settings = {
+    explicit: true,
+    options: [
+        '--version -v',
+        '--name -n' ]
+};
+commandos.parse(options, settings);
+// RETURN { version, name }
+```
+
 ##	API
 
 ### commandos.parse()
 
 *   Object __commandos.parse__()
 *   Object __commandos.parse__(string | string[] *cmdline*)
-*   Object __commandos.parse__(*cmdline*, Array *optionDefinitions*)
-*   Object __commandos.parse__(*cmdline*, Object *settings*)
+*   Object __commandos.parse__(Object *options*)
+*   Object __commandos.parse__(*cmdline* | *options*, Array *optionDefinitions*)
+*   Object __commandos.parse__(*cmdline* | *options*, Object *settings*)
 
 参数 *settings* 通过以下属性设定 __commandos.parse__ 的行为模式：
 

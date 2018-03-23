@@ -2,6 +2,10 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.2.0] - Mar 23nd, 2018
+
+*   Ready-made *options* object accepted, see [Ready-Made Object Passed In](./README.md#ready-made-object-passed-in).
+
 ##	[0.1.6] - Feb 23th, 2018
 
 *	Fixed the bug that, in ODL, option alias is forcely turn to lowercase.

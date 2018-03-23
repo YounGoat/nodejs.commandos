@@ -14,7 +14,7 @@ LANGUAGES / [简体中文](./README.zh_CN.md)
 
 The name *commandos* is combination of *command* and *DOS*. __commandos__ is a light-weighted command line parser which help to connect cli and Node.js application.
 
-##	Table of contents
+##	ToC, Table of Contents
 
 *	[Get Started](#get-started)
 *	[API](#api)
@@ -26,9 +26,6 @@ The name *commandos* is combination of *command* and *DOS*. __commandos__ is a l
 *	[Honorable Dependents](#honorable-dependents)
 *	[About](#about)
 *	[References](#references)
-
-##	Links
-
 *	[CHANGE LOG](./CHANGELOG.md)
 *	[Homepage](https://github.com/YounGoat/nodejs.commandos)
 
@@ -128,14 +125,30 @@ commandos.parse('foo -n JACK -g male', settings);
 // The first option group matched, becuase it does NOT require any options.
 ```
 
+### Ready-Made Object Passed In
+
+`commandos.parse()` may accept a ready-made *options* object, validate it and make it up with accompanied *settings*. E.g.
+```javascript
+const options = { v: '1.0', name: 'JACK' };
+const settings = {
+    explicit: true,
+    options: [
+        '--version -v',
+        '--name -n' ]
+};
+commandos.parse(options, settings);
+// RETURN { version, name }
+```
+
 ##	API
 
 ### commandos.parse()
 
 *   Object __commandos.parse__()
 *   Object __commandos.parse__(string | string[] *cmdline*)
-*   Object __commandos.parse__(*cmdline*, Array *optionDefinitions*)
-*   Object __commandos.parse__(*cmdline*, Object *settings*)
+*   Object __commandos.parse__(Object *options*)
+*   Object __commandos.parse__(*cmdline* | *options*, Array *optionDefinitions*)
+*   Object __commandos.parse__(*cmdline* | *options*, Object *settings*)
 
 To indicate how __commandos.parse__ actions, parameter *settings* may contain following attributes:
 

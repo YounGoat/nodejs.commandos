@@ -462,24 +462,38 @@ function parseRaw(args, def) {
 /**
  * @param  {Object|string|string[]} cmd
  * @param  {Object} def
+ * @param  {boolean} onlyArgs - PRIVATE
  */
-function parseCommand(cmd, def) {
-
+function parseCommand(cmd, def, onlyArgs) {
     // ---------------------------
     // Argument Validation
 
-    let argv = null, readyOptions = null;
+    // Because `onlyArgs` is a private argument which may only be passed in by
+    // `parseCommand.onlyArgs()`. It always occupies the third position in the 
+    // argument list.
+
+    let argv = null, readyMadeOptions = null;
 
     if (typeof arguments[0] == 'string') {
         argv = split(arguments[0], /\s+/, ['"', "'"], '\\');
         def = arguments[1];
     } 
+    
+    // If arguments look like (Array), the only array will be regarded as 
+    // command line args.
     else if (arguments[0] instanceof Array) {
         argv = arguments[0].slice(0);
         def = arguments[1];
     } 
-    else if (typeof arguments[0] == 'object') {
+
+    // If the first argument is an object, it will be regarded as made-ready 
+    // command line args ONLY IF the second argument exists and is *def*.
+    else if (typeof arguments[0] == 'object' 
+        && (typeof arguments[1] == 'object' || arguments[1] instanceof Array)) 
+    {
         let cmd = arguments[0];
+        def = arguments[1];
+
         let options = [], $ = [];
         for (let name in cmd) {
             if (name == '$') {
@@ -489,18 +503,16 @@ function parseCommand(cmd, def) {
                 options.push({ name, value: cmd[name] });
             }
         }
-        readyOptions = { options, $ };
+        readyMadeOptions = { options, $ };
+        
     }
     else {
         argv = process.argv.slice(1);
         def = arguments[0];
+        onlyArgs = false;
     }
 
-    if (def instanceof Array) {
-        def = {
-            options: def
-        }
-    }
+    if (def instanceof Array) def = { options: def };
     def = Object.assign({
         overwrite: true,
         caseSensitive: true,
@@ -510,7 +522,8 @@ function parseCommand(cmd, def) {
         options: [],
     }, def);
 
-    let args = argv ? argv.slice(1) : null;
+    let args = null;
+    if (argv) args = onlyArgs ? argv : argv.slice(1);
     // let [name, ...args] = argv;
 
     // ---------------------------
@@ -518,7 +531,7 @@ function parseCommand(cmd, def) {
 
     let parsedOptions = null;        
     try {
-        let raw = readyOptions ? readyOptions : parseRaw(args, def);
+        let raw = readyMadeOptions ? readyMadeOptions : parseRaw(args, def);
         // let raw = parseRaw(args, def);
         if (def.groups && def.groups.length) {
             let reasons = [];
@@ -561,5 +574,15 @@ function parseCommand(cmd, def) {
     
     return parsedOptions;
 }
+
+/**
+ * Same as parseCommand() but the command name itself is absent in `args`.
+ * E.g.
+ *   parseCommand('foo --name ching --age 18', def);
+ *   parseCommand.onlyArgs('--name ching --age 18', def);
+ */
+parseCommand.onlyArgs = function(args, def) {
+    return parseCommand(args, def, true);
+};
 
 module.exports = parseCommand;

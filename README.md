@@ -193,6 +193,10 @@ If option is __multiple__, it SHOULD NOT be a kind of switching value at the sam
 
 It can also be a string according to private syntax looks like [column definition in MySQL](https://dev.mysql.com/doc/refman/8.0/en/create-table.html). For convenience, it is hereinafter referred to as [__ODL__(Option Definition Language)](#odl-option-definition-language).
 
+### commandos.parse.onlyArgs()
+
+Same as `commandos.parse()` but first part of *cmdline* will be regarded as option or non-option value instead of name of command.
+
 ##  Go Advanced
 
 ### ODL, Option Definition Language

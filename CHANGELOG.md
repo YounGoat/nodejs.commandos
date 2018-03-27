@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.2.1] - Mar 27th, 2018
+
+*   Fixed the bug on `commandos.parse(Object)` which leads to ambiguity about what it is? Options or definitions?
+*   `commandos.parse.onlyArgs()` added.
+
 ##  [0.2.0] - Mar 23nd, 2018
 
 *   Ready-made *options* object accepted, see [Ready-Made Object Passed In](./README.md#ready-made-object-passed-in).

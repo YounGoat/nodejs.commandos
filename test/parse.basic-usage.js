@@ -11,7 +11,7 @@ const MODULE_REQUIRE = 1
     , parseCommand = noda.inRequire('parse')
     ;
 
-describe('parse, simple usage', () => {
+describe('parse, basic usage', () => {
     it('basic usage', () => {
         let cmdtext = 'foo -v 1.0 --male';
         let cmd = parseCommand(cmdtext);

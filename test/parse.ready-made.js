@@ -14,14 +14,20 @@ const MODULE_REQUIRE = 1
 describe('parse with ready-made options', () => {
     it('basic usage', () => {
         let options = { version: '1.0', $: [1,2] };
-        let cmd = parseCommand(options);
+        
+        // The second argument is necessary to avoid ambiguity.
+        let cmd = parseCommand(options, {});
+
         assert.equal(cmd.version, '1.0');
         assert.deepEqual([1,2], cmd.$)
     });
 
     it('when $ is scalar', () => {
         let options = { $: '1.0' };
-        let cmd = parseCommand(options);
+
+        // The second argument is necessary to avoid ambiguity.
+        let cmd = parseCommand(options, {});
+
         assert.deepEqual(['1.0'], cmd.$);
     });
 

@@ -180,6 +180,7 @@ function parseColumn(desc) {
                 case 'assignable':
                 case 'multiple':
                 case 'overwrite':
+                case 'objected':
                 case 'caseSensitive': // actually, "caseSensitive" will not really occur because deco has been lowercased before.
                     column[deco] = !notdeco;
                     break;
@@ -260,6 +261,11 @@ function parseColumn(desc) {
     column.assignable = ifUndefined(column.assignable, true);
     column.nullable = ifUndefined(column.nullable, true);
 
+    if (column.name.endsWith('-*')) {
+        column.name = column.name.slice(0, -2);
+        column.objected = true;
+    }
+
     return column;
 }
 
@@ -291,29 +297,59 @@ function parseOptions(raw, def) {
         // *names* includes formal name and alias.
         const names = [column.name].concat(column.alias);
         const names_lc = caseSensitive ? null : names.map(name => name.toLowerCase());
-        const names_notation = names.map(name => (name.length > 1 ? '--' : '-') + name).join(', ');
+
+        const names_matching = (names, name) => {
+            let matched = false;
+            for (let i = 0; i < names.length && !matched; i++) {
+                if (column.objected) {
+                    let prefix = names[i];
+                    if (name.startsWith(prefix) && name[prefix.length] == '-') {
+                        matched = name.slice(prefix.length + 1);
+                    }
+                }
+                else {
+                    matched = (name == names[i]);
+                }
+            }
+            return matched;
+        };
+
+        // names_notation 变量仅用于在遭遇异常时，生成错误信息。
+        const names_notation = names.map(name => 
+            (name.length > 1 ? '--' : '-') + name + (column.objected ? '-*' : '')).join(', ');
         names_notation_cache[column.name] = names_notation;
 
         let found = false;
-        let value = column.multiple ? [] : null;
+        
+        let value = null;
+        if (column.multiple) value = [];
+        if (column.objected) value = {};
+
         for (let i = 0; i < raw.options.length; i++) {
             let option = raw.options[i];
-            let matched = caseSensitive ? names.includes(option.name) : names_lc.includes(option.name.toLowerCase());
+            let matched = caseSensitive ? names_matching(names, option.name) : names_matching(names_lc, option.name.toLowerCase());
             if (matched) {
-                if (column.multiple) {
+                if (column.objected) {
+                    let v = consumeOption(i, !column.assignable);
+                    if (!column.nullable && typeof v == 'boolean') {
+                        throw new Error(`option need to be valued: ${names_notation}`);
+                    }
+                    value[matched] = v;
+                }
+                else if (column.multiple) {
                     let v = consumeOption(i);
                     if (typeof v == 'boolean') {
-                        throw new Error(`option need to be value: ${names_notation}`);
+                        throw new Error(`option need to be valued: ${names_notation}`);
                     }
                     value.push(v);
-                    i--;
-                } else {
+                }
+                else {
                     if (found && !overwrite) {
                         throw new Error(`option not allowed to be duplicated: ${names_notation}`);
                     }
                     value = consumeOption(i, !column.assignable);
-                    i--;
                 }
+                i--;
                 found = true;
             }
         }
@@ -335,6 +371,7 @@ function parseOptions(raw, def) {
         }
     }
 
+    // 余项指没有归属于任何显式选项的命令行参数。
     // 在依据选项定义的 nonOption 属性消费余项之前，需要先删除已被其他选项显式占用的余项。
     raw.$ = raw.$.filter(v => v !== null);
 

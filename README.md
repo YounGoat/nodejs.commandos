@@ -14,20 +14,26 @@ LANGUAGES / [简体中文](./README.zh_CN.md)
 
 The name *commandos* is combination of *command* and *DOS*. __commandos__ is a light-weighted command line parser which help to connect cli and Node.js application.
 
-##	ToC, Table of Contents
+##  Table of Contents
 
-*	[Get Started](#get-started)
-*	[API](#api)
-*   [Go Advanced](#go-advanced)
-    *   [ODL, Option Definition Language](#odl-option-definition-language)
-    *   [Take Non-option Argument As Option Value](#take-non-option-argument-as-option-value)
-* 	[Examples](#examples)
-*	[Why commandos](#why-commandos)
-*	[Honorable Dependents](#honorable-dependents)
-*	[About](#about)
-*	[References](#references)
-*	[CHANGE LOG](./CHANGELOG.md)
-*	[Homepage](https://github.com/YounGoat/nodejs.commandos)
+* [Get Started](#get-started)
+	* [Generally Returned](#generally-returned)
+	* [Exceptions](#exceptions)
+	* [Options Group](#options-group)
+	* [Objected Option](#objected-option)
+	* [Ready-Made Object Passed In](#ready-made-object-passed-in)
+* [API](#api)
+	* [commandos.parse()](#commandosparse)
+	* [commandos.parse.onlyArgs()](#commandosparseonlyargs)
+* [Go Advanced](#go-advanced)
+	* [ODL, Option Definition Language](#odl-option-definition-language)
+	* [Take Non-option Argument As Option Value](#take-non-option-argument-as-option-value)
+* [Examples](#examples)
+* [Why *commandos*](#why-commandos)
+* [Honorable Dependents](#honorable-dependents)
+* [About](#about)
+* [References](#references)
+* [Links](#links)
 
 ##	Get Started
 
@@ -123,6 +129,14 @@ const settings = {
 commandos.parse('foo -n JACK -g male', settings);
 // RETURN { $ }
 // The first option group matched, becuase it does NOT require any options.
+```
+
+### Objected Option
+
+```javascript
+const options = [ '--meta-*' ];
+commandos.parse('foo --meta-name Charley --meta-gender male', options);
+// RETURN { meta: { name, gender } }
 ```
 
 ### Ready-Made Object Passed In
@@ -287,3 +301,8 @@ If __commandos__ is not to your taste, maybe the following packages is considera
 *   [optimist](https://www.npmjs.com/package/optimist)
 *   [yargs](https://www.npmjs.com/package/yargs)
 *   [cli-argparse](https://www.npmjs.com/package/cli-argparse)
+
+##  Links
+
+*	[CHANGE LOG](./CHANGELOG.md)
+*	[Homepage](https://github.com/YounGoat/nodejs.commandos)

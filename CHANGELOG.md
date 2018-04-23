@@ -2,6 +2,10 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.3.0] - Apr 23rd, 2018
+
+*   Objected options supported.
+
 ##  [0.2.1] - Mar 27th, 2018
 
 *   Fixed the bug on `commandos.parse(Object)` which leads to ambiguity about what it is? Options or definitions?

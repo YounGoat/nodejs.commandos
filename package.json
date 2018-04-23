@@ -1,7 +1,7 @@
 {
     "bin": {},
     "dependencies": {
-        "jinang": "^0.5.1"
+        "jinang": "^0.21.0"
     },
     "devDependencies": {
         "mocha": "^4.1.0",

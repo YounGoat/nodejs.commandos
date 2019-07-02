@@ -134,6 +134,46 @@ function parseColumn(desc) {
             return `#${index}`;
         });
 
+        // FIND_PARENTHESES: {
+        //     let cursor = 0;
+        //     let parseJson = text => {
+        //         try {
+        //             return JSON.parse(text);
+        //         }
+        //         catch (ex) {
+        //             return undefined;
+        //         }
+        //     };
+        //     do {
+        //         let start = desc.indexOf('(', cursor);
+        //         if (start == -1) break;
+
+        //         let end;
+        //         do {
+        //             end = desc.indexOf(')', cursor);
+        //             if (end == -1) {
+        //                 throw new Error(`invalid description snippet: ${desc.slice(start)}`);
+        //             }
+
+        //             let content = desc.slice(start + 1, end - 1);
+        //             let json = parseJson(content);
+        //             if (json === undefined) {
+        //                 json = parseJson()
+        //             }
+                    
+        //             let index = inParentheses.length;
+        //             inParentheses.push(content);
+        //             desc = desc.slice(0, start).replace(/\s+$/, '') + '#' + index + desc.slice(end + 1);
+        //             break;
+        //             } catch(ex) {
+        //                 // continue to containing more.
+        //                 cursort = end;
+        //             }
+        //         } while(true);
+                
+        //     } while(true);
+        // }
+
         let parts = desc.split(/\s+/g);
 
         let decos = [];
@@ -417,7 +457,7 @@ function parseOptions(raw, def) {
             throw new Error(`option required: ${names_notation}`);
         }
 
-        if (!found && column.default) {
+        if (!found && column.hasOwnProperty('default')) {
             parsedOptions[column.name] = column.default;
         }
 
@@ -608,7 +648,7 @@ function parseCommand(cmd, def, onlyArgs) {
         if (def.catcher) def.catcher(ex);
         else throw ex;    
     }
-    
+
     return parsedOptions;
 }
 

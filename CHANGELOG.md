@@ -2,6 +2,15 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.4.0] - Jul 2nd, 2019
+
+*   `commandos.run()` added.
+
+##  [0.3.1] - Sep 11th, 2018
+
+*   Fixed the bug that default value missed if it is a falsy value. E.g.
+    If there is an ODL line `--number DEFAULT(0)`, the returned command options has not a property named 'number' and valued 0 if such option not passed through.
+
 ##  [0.3.0] - Apr 23rd, 2018
 
 *   Objected options supported.

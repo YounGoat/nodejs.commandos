@@ -7,6 +7,7 @@ const MODULE_REQUIRE = 1
 	/* NPM */
 	
 	/* in-package */
+	, parse = require('./parse')
 	;
 
 /**
@@ -37,13 +38,29 @@ function run(argv, options) {
 	}
 
 	if (subcommand) {
-		if (!fs.existsSync(`${commandBaseDir}/${subcommand}`)) {
+		let subcommandBase = `${commandBaseDir}/${subcommand}`;
+		if (!fs.existsSync(subcommandBase)) {
 			console.error(`sub command not found: ${subcommand}`);
 		}
-		else if (fs.existsSync(`${commandBaseDir}/${subcommand}/help.txt`)) {
+		else if (argv[0] == 'help' && fs.existsSync(`${subcommandBase}/help.txt`)) {
 			console.log(fs.readFileSync(`${commandBaseDir}/${subcommand}/help.txt`, 'utf8'));
 		}
 		else {
+			let def = null;
+			try {
+				def = require(`${subcommandBase}/options`);
+			} catch (error) {
+				// DO NOTHING.
+			}
+			if (def) {
+				argv.unshift(subcommand);
+				try {
+					argv = parse(argv, def);	
+				} catch (error) {
+					console.log(error.message);
+					process.exit(1);
+				}				
+			}
 			require(`${commandBaseDir}/${subcommand}`)(argv);
 		}
 	}

@@ -2,6 +2,10 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.5.0] - Jul 25th, 2019
+
+*   Fixed the bug in `commandos.run()`.
+
 ##  [0.4.0] - Jul 2nd, 2019
 
 *   `commandos.run()` added.

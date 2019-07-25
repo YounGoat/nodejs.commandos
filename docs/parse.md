@@ -1,4 +1,4 @@
-#   commandos.parse()
+#   commandos.parse() and commandos.parse.*
 
 ##  Table of Contents
 

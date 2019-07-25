@@ -1,7 +1,9 @@
 // This function will be invoked on `mycommand foo ...`.
-// Pass-in `argv` is an array whose first item will be name of the sub command.
-function command(argv) {
-    if (argv[0] == 'help') {
+// Pass-in `options` is already parsed because options.json exists.
+function command(options) {
+    console.log('options:', options);
+    console.log('--------');
+    if (options.help) {
         console.log('Help info of sub command foo.');
         console.log();
     }

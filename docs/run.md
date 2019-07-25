@@ -10,6 +10,7 @@ Firstly, you should init a package with following files:
 + command
   + foo
     . index.js
+    . options.js
     . help.txt
   + bar
     . index.js
@@ -41,6 +42,16 @@ function command(argv) {
     // ...
 }
 
+// The string will be used when command set help info is displayed.
+command.desc = 'This is a sub command.';
+module.exports = command;
+```
+
+If there is `options.js` or `options.json` existing in the subcommand directory, it will be required and used as the second argument passed to `commandos.parse()`. In such case, the subcommand function SHOULD receive an argument named `options` instead of `argv`:
+```javascript
+function command(options) {
+    // `options` passed in will be an object containing already-parsed options instead of raw argv.
+}
 command.desc = 'This is a sub command.';
 module.exports = command;
 ```

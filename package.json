@@ -1,7 +1,8 @@
 {
     "bin": {},
     "dependencies": {
-        "jinang": "^0.21.0"
+        "jinang": "^0.21.0",
+        "meant": "^1.0.1"
     },
     "devDependencies": {
         "mocha": "^4.1.0",
@@ -13,7 +14,7 @@
         "demo": "node _workspace/mycommand/bin/main"
     },
     "name": "commandos",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "main": "index.js",
     "keywords": [
         "command",

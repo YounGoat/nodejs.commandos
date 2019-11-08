@@ -5,6 +5,7 @@ const MODULE_REQUIRE = 1
 	, fs = require('fs')
 	
 	/* NPM */
+	, meant = require('meant')
 	
 	/* in-package */
 	, parse = require('./parse')
@@ -37,10 +38,27 @@ function run(argv, options) {
 		argv[0] = 'help';
 	}
 
+	const names = fs.readdirSync(commandBaseDir);		
 	if (subcommand) {
 		let subcommandBase = `${commandBaseDir}/${subcommand}`;
-		if (!fs.existsSync(subcommandBase)) {
-			console.error(`sub command not found: ${subcommand}`);
+		if (!names.includes(subcommand)) {
+			console.error(`Sub command not found: ${subcommand}`);
+
+			let similiars = meant(subcommand, names);
+			switch (similiars.length) {
+				case 0: 
+					// DO NOTHING.
+					break;
+
+				case 1:
+					console.log('Did you mean this?');
+					console.log(`    ${similiars[0]}`);
+					break;
+
+				default:
+					console.log('Did you mean one of these?');
+					similiars.forEach(name => console.log(`    ${name}`));
+			}
 		}
 		else if (argv[0] == 'help' && fs.existsSync(`${subcommandBase}/help.txt`)) {
 			console.log(fs.readFileSync(`${commandBaseDir}/${subcommand}/help.txt`, 'utf8'));
@@ -59,13 +77,12 @@ function run(argv, options) {
 				} catch (error) {
 					console.log(error.message);
 					process.exit(1);
-				}				
+				}
 			}
 			require(`${commandBaseDir}/${subcommand}`)(argv);
 		}
 	}
 	else {
-		let names = fs.readdirSync(commandBaseDir);
 		console.log();
 		console.log('NAME');
 		console.log(`\t${commandName} - ${options.desc}`);

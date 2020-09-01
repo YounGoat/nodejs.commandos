@@ -3,6 +3,7 @@
 const MODULE_REQUIRE = 1
 	/* built-in */
 	, fs = require('fs')
+	, os = require('os')
 	
 	/* NPM */
 	, meant = require('meant')
@@ -83,23 +84,26 @@ function run(argv, options) {
 		}
 	}
 	else {
-		console.log();
-		console.log('NAME');
-		console.log(`\t${commandName} - ${options.desc}`);
-		console.log();
-		console.log('SYNOPSIS');
-		console.log(`\t${commandName} help <sub-command-name>`);
-		console.log('\tShow help info of specified sub command.');
-		console.log();
+		let manual = [];
+		manual.push('');
+		manual.push('NAME');
+		manual.push(`\t${commandName} - ${options.desc}`);
+		manual.push('');
+		manual.push('SYNOPSIS');
+		manual.push(`\t${commandName} help <sub-command-name>`);
+		manual.push('\t# Show help info of specified sub command.');
+		manual.push('');
 		names.forEach((name) => {
 			name = name.replace(/\.js$/, '');
 			try {
-				console.log(`\t${commandName} ${name}`);
+				manual.push(`\t${commandName} ${name}`);
 				let run = require(`${commandBaseDir}/${name}`);
 				if (run.desc) {
-					console.log(`\t${run.desc}`);
+					run.desc.split(/[\r\n]+/).forEach(desc => {
+						manual.push(`\t# ${desc}`);
+					});
 				}
-				console.log();
+				manual.push('');
 			} catch (error) {
 				// DO NOTHING.
 				// Ignore invalid directory/file.
@@ -107,16 +111,16 @@ function run(argv, options) {
 		});
 
 		if (options.alias && options.alias.length > 0) {
-			console.log();
-			console.log('ALIAS');
+			manual.push('');
+			manual.push('ALIAS');
 			options.alias.forEach(couple => {
 				let newname = Array.isArray(couple[0]) ? couple[0].join(' ') : couple[0];
 				let oldname = Array.isArray(couple[1]) ? couple[1].join(' ') : couple[1];
-
-				console.log(`\t${commandName} ${newname} = ${commandName} ${oldname}`);
+				manual.push(`\t# ${commandName} ${newname} = ${commandName} ${oldname}`);
 			});
-			console.log();
+			manual.push('');
 		}
+		console.log(manual.join(os.EOL));
 	}
 }
 

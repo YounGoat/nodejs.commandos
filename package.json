@@ -1,10 +1,12 @@
 {
     "bin": {},
     "dependencies": {
+        "colors": "^1.4.0",
         "jinang": "^0.21.0",
         "meant": "^1.0.1"
     },
     "devDependencies": {
+        "minimist": "^1.2.5",
         "mocha": "^4.1.0",
         "noda": "^0.1.2"
     },

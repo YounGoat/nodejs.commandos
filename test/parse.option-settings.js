@@ -145,4 +145,15 @@ describe('parse, option settings', () => {
         assert.equal(cmd.version, '1.0');
         assert.equal(cmd.name, true);
     });
+
+    it('enum', () => {
+        let cmdtext = 'foo --gender man';
+        let options = [ 
+            { 
+                name: 'gender',
+                enum: [ 'male', 'female' ],
+            }
+        ];
+        assert.throws(() => parseCommand(cmdtext, options));
+    });
 });

@@ -220,6 +220,9 @@ ODL is a tiny language used to define option. It is an easy alternative for opti
 
 // * Set default value.
 '--number DEFAULT(99)'
+
+// * Set avaiable values.
+'--gender ENUM(male, female)'
 ```
 
 Keywords in ODL is __case-insensitive__:

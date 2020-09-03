@@ -19,8 +19,9 @@ const MODULE_REQUIRE = 1
  * @param  {string[]}  options.names - command name(s)
  * @param  {string}    options.desc  - command description
  * @param  {string}    options.root  - parent directory of basic 'command' directory
+ * @param  {Function} [options.beforeRun]
  */
-function run(argv, options) {
+async function run(argv, options) {
 	let commandName = options.names.join(' ');
 
 	let commandBaseDir = `${options.root}/command`;
@@ -39,7 +40,7 @@ function run(argv, options) {
 		argv[0] = 'help';
 	}
 
-	const names = fs.readdirSync(commandBaseDir);		
+	const names = fs.readdirSync(commandBaseDir);
 	if (subcommand) {
 		let subcommandBase = `${commandBaseDir}/${subcommand}`;
 		if (!names.includes(subcommand)) {
@@ -80,7 +81,13 @@ function run(argv, options) {
 					process.exit(1);
 				}
 			}
-			require(`${commandBaseDir}/${subcommand}`)(argv);
+
+			if (options.beforeRun) {
+				await options.beforeRun();
+			}
+
+			let run = require(`${commandBaseDir}/${subcommand}`);
+			run(argv);
 		}
 	}
 	else {

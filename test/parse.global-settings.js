@@ -20,7 +20,6 @@ describe('parse, global settings', () => {
         assert.equal(cmd.version, '1.0');
     });
 
-
     it('explicit enabled', () => {
         let cmdtext = 'foo -v 1.0';
         let settings = { explicit: true };

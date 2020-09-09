@@ -62,7 +62,7 @@ async function run(argv, options) {
 					similiars.forEach(name => console.log(`    ${name}`));
 			}
 		}
-		else if (argv[0] == 'help' && fs.existsSync(`${subcommandBase}/help.txt`)) {
+		else if ((argv[0] == 'help' || argv.includes('--help') || argv.includes('-h')) && fs.existsSync(`${subcommandBase}/help.txt`)) {
 			console.log(fs.readFileSync(`${commandBaseDir}/${subcommand}/help.txt`, 'utf8'));
 		}
 		else {

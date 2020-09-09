@@ -83,11 +83,15 @@ async function run(argv, options) {
 			}
 
 			if (options.beforeRun) {
-				await options.beforeRun();
+				await options.beforeRun(argv);
 			}
 
 			let run = require(`${commandBaseDir}/${subcommand}`);
-			run(argv);
+			let ret = await run(argv);
+
+			if (options.afterRun) {
+				await options.afterRun(argv, ret);
+			}
 		}
 	}
 	else {

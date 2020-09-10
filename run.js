@@ -29,12 +29,32 @@ async function run(argv, options) {
 		commandBaseDir = `${commandBaseDir}/${options.names[i]}/command`;
 	}
 
+	/**
+	 * Replace with alais if match.
+	 */
+	if (options.alias) {
+		options.alias.find(couple => {
+			let [ real, target ] = couple;
+			if (!Array.isArray(real)) {
+				real = [ real ];
+			}
+
+			if (real.every((s, index) => s == argv[index])) {
+				argv = [].concat(target, argv.slice(real.index));
+				return true;
+			}
+		});
+	}
+
 	let subcommand = null;
 	if (argv.length && !argv[0].startsWith('-')) {
 		subcommand = argv.shift();
 	}
 
-	// Subcommand "help" is a virtual one.
+	/**
+	 * Subcommand "help" is a virtual one.
+	 * Actually, "help foobar" is regarded as "foobar help".
+	 */
 	if (subcommand == 'help') {
 		subcommand = argv[0];
 		argv[0] = 'help';
@@ -96,6 +116,7 @@ async function run(argv, options) {
 	}
 	else {
 		let manual = [];
+		let L = line => manual.push(line);
 		manual.push('');
 		manual.push('NAME');
 		manual.push(`\t${commandName} - ${options.desc}`);
@@ -127,7 +148,7 @@ async function run(argv, options) {
 			options.alias.forEach(couple => {
 				let newname = Array.isArray(couple[0]) ? couple[0].join(' ') : couple[0];
 				let oldname = Array.isArray(couple[1]) ? couple[1].join(' ') : couple[1];
-				manual.push(`\t# ${commandName} ${newname} = ${commandName} ${oldname}`);
+				manual.push(`\t${commandName} ${newname} = ${commandName} ${oldname}`);
 			});
 			manual.push('');
 		}

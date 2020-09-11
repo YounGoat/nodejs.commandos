@@ -14,19 +14,48 @@ const MODULE_REQUIRE = 1
 
 /**
  * Command entrance.
- * @param  {string[]}  argv          - command line arguments
- * @param  {Object}    options    
- * @param  {string[]}  options.names - command name(s)
- * @param  {string}    options.desc  - command description
- * @param  {string}    options.root  - parent directory of basic 'command' directory
- * @param  {Function} [options.beforeRun]
+ * @param {string[]}  argv     - command line arguments
+ * @param {Object}    options  - basic info about the command set.
+ *   
+ * @param {string}    options.name
+ * @param {string}    options.desc       - command description
+ * @param {string}    options.commandDir - command description
+ * @param {Function} [options.afterRun]
+ * @param {Function} [options.beforeRun]
+ * @param {Function} [options.onError]
+
+ * -- deprecated params --
+ * @param {string[]}  options.names - command name(s)
+ * @param {string}    options.root  - parent directory of basic 'command' directory
  */
 async function run(argv, options) {
-	let commandName = options.names.join(' ');
+	let commandName = null;
+	let commandBaseDir = null;
 
-	let commandBaseDir = `${options.root}/command`;
-	for (let i = 1; i < options.names.length; i++) {
-		commandBaseDir = `${commandBaseDir}/${options.names[i]}/command`;
+	if (options.names) {
+		commandName = options.names.join(' ');
+		commandBaseDir = `${options.root}/command`;
+		for (let i = 1; i < options.names.length; i++) {
+			commandBaseDir = `${commandBaseDir}/${options.names[i]}/command`;
+		}
+	}
+	else {
+		commandName = options.name;
+		commandBaseDir = options.commandDir;
+	}
+
+	let subCommand = null;
+	if (argv.length && !argv[0].startsWith('-')) {
+		subCommand = argv.shift();
+	}
+
+	/**
+	 * subCommand "help" is a virtual one.
+	 * Actually, "help foobar" is regarded as "foobar help".
+	 */
+	if (subCommand == 'help') {
+		subCommand = argv[0];
+		argv[0] = 'help';
 	}
 
 	/**
@@ -34,39 +63,32 @@ async function run(argv, options) {
 	 */
 	if (options.alias) {
 		options.alias.find(couple => {
-			let [ real, target ] = couple;
-			if (!Array.isArray(real)) {
-				real = [ real ];
+			let [ pesudo, target ] = couple;
+			if (!Array.isArray(pesudo)) {
+				pesudo = [ pesudo ];
+			}
+			if (!Array.isArray(target)) {
+				target = [ target ];
 			}
 
-			if (real.every((s, index) => s == argv[index])) {
-				argv = [].concat(target, argv.slice(real.index));
+			let [ pesudoSubCommand, ...pesudoArgs ] = pesudo;
+			let [ targetSubCommand, ...targetArgs ] = target;
+
+			if (pesudoSubCommand == subCommand && pesudoArgs.every((s, index) => s == argv[index])) {
+				subCommand = targetSubCommand;
+				argv = [].concat(targetArgs, argv.slice(pesudoArgs.length));
 				return true;
 			}
 		});
 	}
 
-	let subcommand = null;
-	if (argv.length && !argv[0].startsWith('-')) {
-		subcommand = argv.shift();
-	}
-
-	/**
-	 * Subcommand "help" is a virtual one.
-	 * Actually, "help foobar" is regarded as "foobar help".
-	 */
-	if (subcommand == 'help') {
-		subcommand = argv[0];
-		argv[0] = 'help';
-	}
-
 	const names = fs.readdirSync(commandBaseDir);
-	if (subcommand) {
-		let subcommandBase = `${commandBaseDir}/${subcommand}`;
-		if (!names.includes(subcommand)) {
-			console.error(`Sub command not found: ${subcommand}`);
+	if (subCommand) {
+		let subCommandBase = `${commandBaseDir}/${subCommand}`;
+		if (!names.includes(subCommand)) {
+			console.error(`Sub command not found: ${subCommand}`);
 
-			let similiars = meant(subcommand, names);
+			let similiars = meant(subCommand, names);
 			switch (similiars.length) {
 				case 0: 
 					// DO NOTHING.
@@ -82,20 +104,22 @@ async function run(argv, options) {
 					similiars.forEach(name => console.log(`    ${name}`));
 			}
 		}
-		else if ((argv[0] == 'help' || argv.includes('--help') || argv.includes('-h')) && fs.existsSync(`${subcommandBase}/help.txt`)) {
-			console.log(fs.readFileSync(`${commandBaseDir}/${subcommand}/help.txt`, 'utf8'));
+		else if ((argv[0] == 'help' || argv.includes('--help') || argv.includes('-h')) && fs.existsSync(`${subCommandBase}/help.txt`)) {
+			console.log(fs.readFileSync(`${commandBaseDir}/${subCommand}/help.txt`, 'utf8'));
 		}
 		else {
+			// Command name.
+			let name = subCommand;
+
 			let def = null;
 			try {
-				def = require(`${subcommandBase}/options`);
+				def = require(`${subCommandBase}/options`);
 			} catch (error) {
 				// DO NOTHING.
 			}
 			if (def) {
-				argv.unshift(subcommand);
 				try {
-					argv = parse(argv, def);	
+					argv = parse.onlyArgs(argv, def);	
 				} catch (error) {
 					console.log(error.message);
 					process.exit(1);
@@ -103,15 +127,47 @@ async function run(argv, options) {
 			}
 
 			if (options.beforeRun) {
-				await options.beforeRun(argv);
+				await options.beforeRun({
+					name,
+					argv,
+				});
 			}
 
-			let run = require(`${commandBaseDir}/${subcommand}`);
-			let ret = await run(argv);
+			let run = require(`${commandBaseDir}/${subCommand}`);
+			let error = null;
+			let result = null;
+
+			/**
+			 * The command function `run()` may be a normal function, 
+			 * or someone (e.g. an async function) returns a Promise instance.
+			 */
+			try {
+				result = run(argv);
+			} catch (ex) {
+				error = ex;
+			}
+			
+			if (result instanceof Promise) {
+				result = await result.catch(ex => error = ex);
+			}
 
 			if (options.afterRun) {
-				await options.afterRun(argv, ret);
+				await options.afterRun({
+					name,
+					argv,
+					result,
+					error,
+				});
 			}
+			else if (error) {
+				process.exitCode = 1;
+				console.error(error);
+			}
+
+			/**
+			 * @see https://tldp.org/LDP/abs/html/exitcodes.html 
+			 * Exit Codes With Special Meanings
+			 */
 		}
 	}
 	else {

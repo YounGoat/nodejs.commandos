@@ -6,6 +6,7 @@ const MODULE_REQUIRE = 1
 	, os = require('os')
 	
 	/* NPM */
+	, colors = require('colors')
 	, meant = require('meant')
 	
 	/* in-package */
@@ -89,19 +90,12 @@ async function run(argv, options) {
 			console.error(`Sub command not found: ${subCommand}`);
 
 			let similiars = meant(subCommand, names);
-			switch (similiars.length) {
-				case 0: 
-					// DO NOTHING.
-					break;
-
-				case 1:
-					console.log('Did you mean this?');
-					console.log(`    ${similiars[0]}`);
-					break;
-
-				default:
-					console.log('Did you mean one of these?');
-					similiars.forEach(name => console.log(`    ${name}`));
+			if (similiars.length == 0) {
+				// DO NOTHING.
+			}
+			else {
+				console.log(`Did you mean ${similiars.length == 1 ? 'this' : 'one of these'}?`);
+				similiars.forEach(name => console.log(`- ${commandName} ${colors.blue(name)}`));
 			}
 		}
 		else if ((argv[0] == 'help' || argv.includes('--help') || argv.includes('-h')) && fs.existsSync(`${subCommandBase}/help.txt`)) {

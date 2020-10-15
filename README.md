@@ -20,7 +20,6 @@ The name *commandos* is combination of *command* and *DOS*. __commandos__ is a l
 
 * [API](#api)
 * [Why *commandos*](#why-commandos)
-* [Honorable Dependents](#honorable-dependents)
 * [About](#about)
 * [References](#references)
 * [Links](#links)
@@ -33,8 +32,6 @@ The name *commandos* is combination of *command* and *DOS*. __commandos__ is a l
 ##  Why *commandos*
 
 There are already many packages help you to parse command line content, in which [minimist](https://www.npmjs.com/package/minimist) and [commander](https://www.npmjs.com/package/commander) are probably most famous. However, sometimes __minimist__ is too slim while __commander__ is too heavy. That is why I wrote __commandos__.
-
-##  Honorable Dependents
 
 ##  About
 

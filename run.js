@@ -8,6 +8,7 @@ const MODULE_REQUIRE = 1
 	/* NPM */
 	, colors = require('colors')
 	, meant = require('meant')
+	, minimatch = require('minimatch')
 	
 	/* in-package */
 	, parse = require('./parse')
@@ -56,13 +57,15 @@ async function run(argv, options) {
 	 */
 	if (subCommand == 'help') {
 		subCommand = argv[0];
-		argv[0] = 'help';
+		argv[0] = '--help';
 	}
+
+	const allSubCommandNames = fs.readdirSync(commandBaseDir);
 
 	/**
 	 * Replace with alais if match.
 	 */
-	if (options.alias) {
+	if (subCommand && !allSubCommandNames.includes(subCommand) && options.alias) {
 		options.alias.find(couple => {
 			let [ pesudo, target ] = couple;
 			if (!Array.isArray(pesudo)) {
@@ -75,21 +78,33 @@ async function run(argv, options) {
 			let [ pesudoSubCommand, ...pesudoArgs ] = pesudo;
 			let [ targetSubCommand, ...targetArgs ] = target;
 
-			if (pesudoSubCommand == subCommand && pesudoArgs.every((s, index) => s == argv[index])) {
-				subCommand = targetSubCommand;
+			if (minimatch(subCommand, pesudoSubCommand) 
+				&& pesudoArgs.every((s, index) => minimatch(argv[index], s))
+				) {
+				
+				/**
+				 * Replace place holders.
+				 * 替换占位符。
+				 */
+				targetArgs = targetArgs.map(arg => {
+					return arg.replace(/\$(\d+)/g, (placeholder, num) => {
+						return num == 0 ? subCommand : argv[num - 1];
+					});
+				});
+				
 				argv = [].concat(targetArgs, argv.slice(pesudoArgs.length));
+				subCommand = targetSubCommand;
 				return true;
 			}
 		});
 	}
 
-	const names = fs.readdirSync(commandBaseDir);
 	if (subCommand) {
 		let subCommandBase = `${commandBaseDir}/${subCommand}`;
-		if (!names.includes(subCommand)) {
+		if (!allSubCommandNames.includes(subCommand)) {
 			console.error(`Sub command not found: ${subCommand}`);
 
-			let similiars = meant(subCommand, names);
+			let similiars = meant(subCommand, allSubCommandNames);
 			if (similiars.length == 0) {
 				// DO NOTHING.
 			}
@@ -164,6 +179,13 @@ async function run(argv, options) {
 			 */
 		}
 	}
+
+	// Display existing manual.
+	else if (fs.existsSync(`${commandBaseDir}/help.txt`)) {
+		console.log(fs.readFileSync(`${commandBaseDir}/help.txt`, 'utf8'));
+	}
+
+	// Generate and display manual.
 	else {
 		let manual = [];
 		let L = line => manual.push(line);
@@ -175,7 +197,7 @@ async function run(argv, options) {
 		manual.push(`\t${commandName} help <sub-command-name>`);
 		manual.push('\t# Show help info of specified sub command.');
 		manual.push('');
-		names.forEach((name) => {
+		allSubCommandNames.forEach((name) => {
 			name = name.replace(/\.js$/, '');
 			try {
 				manual.push(`\t${commandName} ${name}`);

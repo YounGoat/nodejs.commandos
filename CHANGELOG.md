@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.6.0] - Dec 15th, 2020
+
+*   Support place holder in alias.
+*   Read help info about top command from '<ROOT>/help.txt'.
+
 ##  [0.5.2] - Sep 13th, 2020
 
 *   Make `commandos.run()` more powerful.

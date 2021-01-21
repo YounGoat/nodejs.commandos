@@ -1,5 +1,7 @@
 'use strict';
 
+const { profileEnd } = require('console');
+
 const MODULE_REQUIRE = 1
 	/* built-in */
 	, fs = require('fs')
@@ -12,6 +14,7 @@ const MODULE_REQUIRE = 1
 	
 	/* in-package */
 	, parse = require('./parse')
+	, more = require('./lib/more')
 	;
 
 /**
@@ -79,6 +82,7 @@ async function run(argv, options) {
 			let [ targetSubCommand, ...targetArgs ] = target;
 
 			if (minimatch(subCommand, pesudoSubCommand) 
+				&& argv.length >= pesudoArgs.length
 				&& pesudoArgs.every((s, index) => minimatch(argv[index], s))
 				) {
 				
@@ -99,22 +103,27 @@ async function run(argv, options) {
 		});
 	}
 
-	if (subCommand) {
-		let subCommandBase = `${commandBaseDir}/${subCommand}`;
-		if (!allSubCommandNames.includes(subCommand)) {
+	if (subCommand && !allSubCommandNames.includes(subCommand)) {
+		let matching = allSubCommandNames.filter(name => name.startsWith(subCommand));
+		if (matching.length == 1) {
+			subCommand = matching[0];
+		}
+		else {
 			console.error(`Sub command not found: ${subCommand}`);
-
 			let similiars = meant(subCommand, allSubCommandNames);
-			if (similiars.length == 0) {
-				// DO NOTHING.
-			}
-			else {
+			if (similiars.length > 0) {
 				console.log(`Did you mean ${similiars.length == 1 ? 'this' : 'one of these'}?`);
 				similiars.forEach(name => console.log(`- ${commandName} ${colors.blue(name)}`));
 			}
+			subCommand = null;			
 		}
-		else if ((argv[0] == 'help' || argv.includes('--help') || argv.includes('-h')) && fs.existsSync(`${subCommandBase}/help.txt`)) {
-			console.log(fs.readFileSync(`${commandBaseDir}/${subCommand}/help.txt`, 'utf8'));
+	}
+
+	if (subCommand) {		
+		let subCommandBase = `${commandBaseDir}/${subCommand}`;
+		
+		if ((argv[0] == 'help' || argv.includes('--help') || argv.includes('-h')) && fs.existsSync(`${subCommandBase}/help.txt`)) {
+			more(fs.readFileSync(`${commandBaseDir}/${subCommand}/help.txt`, 'utf8'));
 		}
 		else {
 			// Command name.
@@ -224,7 +233,9 @@ async function run(argv, options) {
 			});
 			manual.push('');
 		}
-		console.log(manual.join(os.EOL));
+		
+		more(manual.join(os.EOL));
+		// console.log(manual.join(os.EOL));
 	}
 }
 

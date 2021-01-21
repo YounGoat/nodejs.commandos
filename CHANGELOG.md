@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.6.1] - Jan 18th, 2021
+
+*   Fix bug in `commandos.run()` where real argv length is less than what defined by `alias`.  
+    之前，当 `commandos.run()` 实际的命令参数个数少于别名中定义的参数个数时，会抛出异常。
+
 ##  [0.6.0] - Dec 15th, 2020
 
 *   Support place holder in alias.

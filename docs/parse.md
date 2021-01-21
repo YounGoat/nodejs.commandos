@@ -262,6 +262,19 @@ In ODL, delimiters `[]` is used to define the nonOption property:
 '--name [>1]'
 ```
 
+There are four ways to match values:
+*   `=* foobar`  
+    Equal to "foobar" (case insensitive).
+
+*   `= foobar`  
+    Equal to "foobar" (case sensitive).
+
+*   `~* <REGULAR_EXPRESSION>`   
+    Match regular expression (case insensitive).
+
+*   `~ <REGULAR_EXPRESSION>`   
+    Match regular expression (case sensitive).
+
 ##  Examples
 
 Read unit test code for examples:

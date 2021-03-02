@@ -82,8 +82,9 @@ And we have introduced some properties of *options*. ALl available properties ac
   
 *	__alias__ [ *pesudo*, *target* ][]  
   Alias of existing sub commands.  
-  
-  
+
+* __useManon__ boolean  
+  Whether to render help text with [manon](https://www.npmjs.com/package/manon) before displaying it.
   
 ##  Command Alias 
 

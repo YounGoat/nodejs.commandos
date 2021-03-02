@@ -25,6 +25,7 @@ const MODULE_REQUIRE = 1
  * @param {string}    options.name
  * @param {string}    options.desc       - command description
  * @param {string}    options.commandDir - command description
+ * @param {boolean}  [options.useManon]
  * @param {Function} [options.afterRun]
  * @param {Function} [options.beforeRun]
  * @param {Function} [options.onError]
@@ -34,6 +35,13 @@ const MODULE_REQUIRE = 1
  * @param {string}    options.root  - parent directory of basic 'command' directory
  */
 async function run(argv, options) {
+	let printManual = text => {
+		if (options.useManon) {
+			text = require('manon').format(text, 'console');
+		}
+		more(text);
+	};
+
 	let commandName = null;
 	let commandBaseDir = null;
 
@@ -123,7 +131,7 @@ async function run(argv, options) {
 		let subCommandBase = `${commandBaseDir}/${subCommand}`;
 		
 		if ((argv[0] == 'help' || argv.includes('--help') || argv.includes('-h')) && fs.existsSync(`${subCommandBase}/help.txt`)) {
-			more(fs.readFileSync(`${commandBaseDir}/${subCommand}/help.txt`, 'utf8'));
+			printManual(fs.readFileSync(`${commandBaseDir}/${subCommand}/help.txt`, 'utf8'));
 		}
 		else {
 			// Command name.
@@ -191,7 +199,7 @@ async function run(argv, options) {
 
 	// Display existing manual.
 	else if (fs.existsSync(`${commandBaseDir}/help.txt`)) {
-		console.log(fs.readFileSync(`${commandBaseDir}/help.txt`, 'utf8'));
+		printManual(fs.readFileSync(`${commandBaseDir}/help.txt`, 'utf8'));
 	}
 
 	// Generate and display manual.
@@ -229,13 +237,12 @@ async function run(argv, options) {
 			options.alias.forEach(couple => {
 				let newname = Array.isArray(couple[0]) ? couple[0].join(' ') : couple[0];
 				let oldname = Array.isArray(couple[1]) ? couple[1].join(' ') : couple[1];
-				manual.push(`\t${commandName} ${newname} = ${commandName} ${oldname}`);
+				manual.push(`\t* \`${commandName} ${newname}\` = \`${commandName} ${oldname}\``);
 			});
 			manual.push('');
 		}
-		
-		more(manual.join(os.EOL));
-		// console.log(manual.join(os.EOL));
+
+		printManual(manual.join(os.EOL));
 	}
 }
 

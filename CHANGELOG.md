@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.7.4] - 2021-03-04
+
+*   在 darwin / linux 操作系统平台，用 `more` 命令取代 `less` 执行帮助手册输出。  
+    On darwin / linux os, replace "more" with "less" on outputing manual page.
+
 ##  [0.7.3] - 2021-03-04
 
 *   Upgrade "manon" dependency to v0.1.0.

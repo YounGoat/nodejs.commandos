@@ -2,6 +2,10 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.7.3] - 2021-03-04
+
+*   Upgrade "manon" dependency to v0.1.0.
+
 ##  [0.6.1] - Jan 18th, 2021
 
 *   Fix bug in `commandos.run()` where real argv length is less than what defined by `alias`.  

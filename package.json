@@ -18,7 +18,7 @@
         "test": "mocha",
         "demo": "node _workspace/mycommand/bin/main"
     },
-    "name": "node-getopts",
+    "name": "commandos",
     "version": "0.8.0",
     "main": "index.js",
     "keywords": [

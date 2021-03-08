@@ -6,9 +6,11 @@ const MODULE_REQUIRE = 1
 	/* built-in */
 	, fs = require('fs')
 	, os = require('os')
+	, path = require('path')
 	
 	/* NPM */
 	, colors = require('colors')
+	, if2 = require('if2')
 	, meant = require('meant')
 	, minimatch = require('minimatch')
 	
@@ -16,6 +18,9 @@ const MODULE_REQUIRE = 1
 	, parse = require('./parse')
 	, more = require('./lib/more')
 	;
+
+const SPACE = String.fromCharCode(32);
+const DASH = '-';
 
 /**
  * Command entrance.
@@ -41,12 +46,12 @@ async function run(argv, options) {
 		}
 		more(text);
 	};
-
+	
 	let commandName = null;
 	let commandBaseDir = null;
 
 	if (options.names) {
-		commandName = options.names.join(' ');
+		commandName = options.names.join(SPACE);
 		commandBaseDir = `${options.root}/command`;
 		for (let i = 1; i < options.names.length; i++) {
 			commandBaseDir = `${commandBaseDir}/${options.names[i]}/command`;
@@ -58,7 +63,7 @@ async function run(argv, options) {
 	}
 
 	let subCommand = null;
-	if (argv.length && !argv[0].startsWith('-')) {
+	if (argv.length && !argv[0].startsWith(DASH)) {
 		subCommand = argv.shift();
 	}
 
@@ -145,7 +150,7 @@ async function run(argv, options) {
 			}
 			if (def) {
 				try {
-					argv = parse.onlyArgs(argv, def);	
+					argv = parse.onlyArgs(argv, def);
 				} catch (error) {
 					console.log(error.message);
 					process.exit(1);
@@ -159,20 +164,59 @@ async function run(argv, options) {
 				});
 			}
 
-			let run = require(`${commandBaseDir}/${subCommand}`);
+			/**
+			 * In generally, subCommandDir is a directory containing index.js, 
+			 * options.js and help.txt. It can also be made up of `index.js` 
+			 * and `commands` sub directory.
+			 * 通常，subCommandDir 是一个目录，它可以包含组成一个命令的若干要素文件。
+			 * 如果子命令是一个命令簇，那么它也可能包含一个 commands 子目录。
+			 */
+			let subCommandDir = path.join(commandBaseDir, subCommand);
+			let subCommandEntrypoint = require(subCommandDir);
 			let error = null;
 			let result = null;
 
-			/**
-			 * The command function `run()` may be a normal function, 
-			 * or someone (e.g. an async function) returns a Promise instance.
-			 */
-			try {
-				result = run(argv);
-			} catch (ex) {
-				error = ex;
+			if (typeof subCommandEntrypoint != 'function') {
+				let options2 = { ...subCommandEntrypoint } ;
+
+				/**
+				 * The command name is decided by parent commands.
+				 * 完整命令名取决于父命令。
+				 */
+				options2.name = [ commandName, subCommand ].join(SPACE);
+
+				/**
+				 * Inherit some action settings from parent command.
+				 * 从父命令继承部分行为配置。
+				 */
+				options2.useManon = if2.defined(options2.useManon, options.useManon);
+
+				if (!options2.commandDir) {
+					let pathname = path.join(subCommandDir, 'command');
+					if (fs.existsSync(pathname)) {
+						options2.commandDir = pathname;
+					}
+				}
+
+				if (options2.commandDir) {
+					await run(argv, options2);
+				}
+				else {
+					error = new Error(`Sub command ${subCommand} is neither a function nor a command set.`);
+				}
 			}
-			
+			else {
+				/**
+				 * The command function `subCommandEntrypoint()` may be a normal function, 
+				 * or someone (e.g. an async function) returns a Promise instance.
+				 */
+				try {
+					result = subCommandEntrypoint(argv);
+				} catch (ex) {
+					error = ex;
+				}
+			}
+				
 			if (result instanceof Promise) {
 				result = await result.catch(ex => error = ex);
 			}
@@ -218,9 +262,9 @@ async function run(argv, options) {
 			name = name.replace(/\.js$/, '');
 			try {
 				manual.push(`\t${commandName} ${name}`);
-				let run = require(`${commandBaseDir}/${name}`);
-				if (run.desc) {
-					run.desc.split(/[\r\n]+/).forEach(desc => {
+				let subCommandEntrypoint = require(`${commandBaseDir}/${name}`);
+				if (subCommandEntrypoint.desc) {
+					subCommandEntrypoint.desc.split(/[\r\n]+/).forEach(desc => {
 						manual.push(`\t# ${desc}`);
 					});
 				}
@@ -235,8 +279,8 @@ async function run(argv, options) {
 			manual.push('');
 			manual.push('ALIAS');
 			options.alias.forEach(couple => {
-				let newname = Array.isArray(couple[0]) ? couple[0].join(' ') : couple[0];
-				let oldname = Array.isArray(couple[1]) ? couple[1].join(' ') : couple[1];
+				let newname = Array.isArray(couple[0]) ? couple[0].join(SPACE) : couple[0];
+				let oldname = Array.isArray(couple[1]) ? couple[1].join(SPACE) : couple[1];
 				manual.push(`\t* \`${commandName} ${newname}\` = \`${commandName} ${oldname}\``);
 			});
 			manual.push('');

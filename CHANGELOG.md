@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.8.0] - 2021-03-08
+
+*   Support nesting command-sets.  
+    支持多层命令嵌套。 
+
 ##  [0.7.4] - 2021-03-04
 
 *   在 darwin / linux 操作系统平台，用 `more` 命令取代 `less` 执行帮助手册输出。  

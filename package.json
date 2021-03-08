@@ -2,10 +2,11 @@
     "bin": {},
     "dependencies": {
         "colors": "^1.4.0",
+        "if2": "^0.2.0",
         "jinang": "^0.21.0",
+        "manon": "^0.1.0",
         "meant": "^1.0.1",
-        "minimatch": "^3.0.4",
-        "manon": "^0.1.0"
+        "minimatch": "^3.0.4"
     },
     "devDependencies": {
         "minimist": "^1.2.5",
@@ -17,8 +18,8 @@
         "test": "mocha",
         "demo": "node _workspace/mycommand/bin/main"
     },
-    "name": "commandos",
-    "version": "0.7.4",
+    "name": "node-getopts",
+    "version": "0.8.0",
     "main": "index.js",
     "keywords": [
         "command",

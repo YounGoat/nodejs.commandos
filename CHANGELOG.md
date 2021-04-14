@@ -2,6 +2,10 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.9.0] - 2021-04-14
+*   Member function `.man()` added.  
+    新增 `.man()` 方法。
+
 ##  [0.8.0] - 2021-03-08
 
 *   Support nesting command-sets.  

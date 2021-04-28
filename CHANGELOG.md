@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.10.0] - 2021-04-27
+
+*   Member function `.isLatest()` added.  
+    新增 `.isLatest()` 方法。
+
 ##  [0.9.0] - 2021-04-14
 *   Member function `.man()` added.  
     新增 `.man()` 方法。

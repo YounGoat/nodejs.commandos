@@ -2,12 +2,15 @@
     "bin": {},
     "dependencies": {
         "colors": "^1.4.0",
+        "htp": "^0.12.0",
         "if2": "^0.2.0",
         "jinang": "^0.21.0",
         "manon": "^0.2.0",
         "meant": "^1.0.2",
         "minimatch": "^3.0.4",
-        "noda": "^0.1.2"
+        "noda": "^0.1.2",
+        "qir": "^0.1.0",
+        "semver": "^7.3.5"
     },
     "devDependencies": {
         "minimist": "^1.2.5",
@@ -20,7 +23,7 @@
         "demo": "node _workspace/mycommand/bin/main"
     },
     "name": "commandos",
-    "version": "0.9.0",
+    "version": "0.10.0",
     "main": "index.js",
     "keywords": [
         "command",

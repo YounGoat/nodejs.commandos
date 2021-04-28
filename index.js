@@ -9,10 +9,12 @@ const MODULE_REQUIRE = 1
     , parse = require('./parse')
     , run = require('./run')
     , man = require('./man')
+    , isLatest = require('./isLatest')
     ;
 
 
 module.exports = {
+    isLatest,
     man,
     parse,
     run,

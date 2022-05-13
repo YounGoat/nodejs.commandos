@@ -68,13 +68,18 @@ async function isLatest(options) {
 			let { body } = res;
 			let distTags = body['dist-tags'];
 			let latestVersion = distTags && distTags['latest'];
-			console.log('latestVersion', latestVersion);
 			await dir.writeFile(mainPackage.name, latestVersion);
+			retry = false;
 		}
 	}
 
-	let latestVersion = await dir.readFile(mainPackage.name, 'utf8');
-	return semver.eq(mainPackage.version, latestVersion);
+	if (retry) {
+		throw 'The package is not registered.';
+	}
+	else {
+		let latestVersion = await dir.readFile(mainPackage.name, 'utf8');
+		return semver.eq(mainPackage.version, latestVersion);
+	}
 }
 
 module.exports = isLatest;

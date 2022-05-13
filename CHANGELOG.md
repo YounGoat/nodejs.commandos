@@ -2,6 +2,11 @@
 
 Notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning 2.0.0](http://semver.org/).
 
+##  [0.10.2] - 2022-05-13
+
+*   Fix `verifyArgument()`.  
+    更正 `verifyArgument()` 方法针对数组类型的参数合法性检查未能执行的问题。
+
 ##  [0.10.0] - 2021-04-27
 
 *   Member function `.isLatest()` added.  

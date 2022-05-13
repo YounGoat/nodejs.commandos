@@ -122,13 +122,15 @@ async function run(argv, options) {
 			subCommand = matching[0];
 		}
 		else {
-			console.error(`Sub command not found: ${subCommand}`);
+			console.error(colors.bold.yellow('-- WRANING --'));
+			console.error(`Sub command not found: ${colors.italic.yellow(subCommand)}`);
 			let similiars = meant(subCommand, allSubCommandNames);
 			if (similiars.length > 0) {
 				console.log(`Did you mean ${similiars.length == 1 ? 'this' : 'one of these'}?`);
-				similiars.forEach(name => console.log(`- ${commandName} ${colors.blue(name)}`));
+				similiars.forEach(name => console.log(`- ${colors.italic(commandName)} ${colors.italic.blue(name)}`));
+				return;
 			}
-			subCommand = null;			
+			subCommand = null;
 		}
 	}
 

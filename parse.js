@@ -512,7 +512,7 @@ function verifyArgument(column, value) {
         
     // Multiple argument.
     if (Array.isArray(value)) {
-        for (let i = 0; i < value.length && reason; i++) {
+        for (let i = 0; i < value.length && !reason; i++) {
             reason = verifyArgument(column, value[i]);
         }
         return reason;
